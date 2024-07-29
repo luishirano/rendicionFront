@@ -1,13 +1,13 @@
-// src/components/ContadorModule.js
-
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import { Table, Form, Button, Container, Row, Col } from 'react-bootstrap';
+import { Table, Form, Button, Container, Row, Col, Modal } from 'react-bootstrap';
 
 const ContadorModule = () => {
     const [user, setUser] = useState(null);
     const [documentos, setDocumentos] = useState([]);
     const [empresa, setEmpresa] = useState('');
+    const [selectedDocumento, setSelectedDocumento] = useState(null);
+    const [showModal, setShowModal] = useState(false);
     const [filtros, setFiltros] = useState({
         colaborador: '',
         estado: '',
@@ -56,6 +56,49 @@ const ContadorModule = () => {
         }
     };
 
+    const handleViewFile = async (documento) => {
+        setSelectedDocumento(documento);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedDocumento(null);
+    };
+
+    const handleDownloadFile = async (documentoId, format) => {
+        const response = await api.get(`/documentos/${documentoId}/archivo`, { responseType: 'blob' });
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `documento_${documentoId}.${format}`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleDownloadExcel = async (documentoId) => {
+        const response = await api.get(`/documentos/${documentoId}/export/excel`, { responseType: 'blob' });
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `documento_${documentoId}.xlsx`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleDownloadPDF = async (documentoId) => {
+        const response = await api.get(`/documentos/${documentoId}/export/pdf`, { responseType: 'blob' });
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `documento_${documentoId}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <Container className="mt-5">
             <h1>Módulo del Contador</h1>
@@ -100,10 +143,10 @@ const ContadorModule = () => {
             <Table striped bordered hover>
                 <thead>
                     <tr>
-                        <th>Fecha Solicitud</th>
+                        {/* <th>Fecha Solicitud</th>
                         <th>DNI</th>
                         <th>Usuario</th>
-                        <th>Gerencia</th>
+                        <th>Gerencia</th> */}
                         <th>RUC</th>
                         <th>Proveedor</th>
                         <th>Fecha Emisión</th>
@@ -117,13 +160,15 @@ const ContadorModule = () => {
                         <th>No Gravadas</th>
                         <th>Importe Facturado</th>
                         <th>TC</th>
-                        <th>Anticipo</th>
+                        {/* <th>Anticipo</th>
                         <th>Total</th>
                         <th>Pago</th>
                         <th>Detalle</th>
                         <th>Estado</th>
-                        <th>Empresa</th>
+                        <th>Empresa</th> */}
+                        <th>Archivo</th>
                         <th>Actualizar Estado</th>
+                        <th>Exportar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -133,10 +178,10 @@ const ContadorModule = () => {
                         (!filtros.fechaRegistro || doc.fecha_solicitud.includes(filtros.fechaRegistro))
                     ).map((documento) => (
                         <tr key={documento.id}>
-                            <td>{documento.fecha_solicitud}</td>
+                            {/* <td>{documento.fecha_solicitud}</td>
                             <td>{documento.dni}</td>
                             <td>{documento.usuario}</td>
-                            <td>{documento.gerencia}</td>
+                            <td>{documento.gerencia}</td> */}
                             <td>{documento.ruc}</td>
                             <td>{documento.proveedor}</td>
                             <td>{documento.fecha_emision}</td>
@@ -150,12 +195,19 @@ const ContadorModule = () => {
                             <td>{documento.no_gravadas}</td>
                             <td>{documento.importe_facturado}</td>
                             <td>{documento.tc}</td>
-                            <td>{documento.anticipo}</td>
+                            {/* <td>{documento.anticipo}</td>
                             <td>{documento.total}</td>
                             <td>{documento.pago}</td>
                             <td>{documento.detalle}</td>
                             <td>{documento.estado}</td>
-                            <td>{documento.empresa}</td>
+                            <td>{documento.empresa}</td> */}
+                            <td>
+                                {documento.archivo && (
+                                    <Button variant="link" onClick={() => handleViewFile(documento)}>
+                                        Ver Archivo
+                                    </Button>
+                                )}
+                            </td>
                             <td>
                                 <Form.Control
                                     as="select"
@@ -167,10 +219,45 @@ const ContadorModule = () => {
                                     <option value="PAGADO">PAGADO</option>
                                 </Form.Control>
                             </td>
+                            <td>
+                                <Button variant="primary" onClick={() => handleDownloadExcel(documento.id)}>
+                                    Excel
+                                </Button>
+                                <Button variant="secondary" onClick={() => handleDownloadPDF(documento.id)}>
+                                    PDF
+                                </Button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
             </Table>
+
+            {/* Modal para ver el archivo */}
+            {selectedDocumento && (
+                <Modal show={showModal} onHide={handleCloseModal}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Archivo del Documento</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <img
+                            src={`http://127.0.0.1:8000/documentos/${selectedDocumento.id}/archivo`}
+                            alt="Archivo del Documento"
+                            className="img-fluid"
+                        />
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseModal}>
+                            Cerrar
+                        </Button>
+                        <Button variant="primary" onClick={() => handleDownloadFile(selectedDocumento.id, 'pdf')}>
+                            Descargar PDF
+                        </Button>
+                        <Button variant="primary" onClick={() => handleDownloadFile(selectedDocumento.id, 'xlsx')}>
+                            Descargar Excel
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            )}
         </Container>
     );
 };
