@@ -10,7 +10,7 @@ const ContadorModule = () => {
     const [showModal, setShowModal] = useState(false);
     const [filtros, setFiltros] = useState({
         colaborador: '',
-        estado: '',
+        estado: 'PENDIENTE',
         fechaRegistro: '',
     });
 
@@ -26,7 +26,12 @@ const ContadorModule = () => {
     useEffect(() => {
         const fetchDocumentos = async () => {
             try {
-                const response = await api.get(`/documentos?empresa=${empresa}`);
+                const response = await api.get(`/documentos`, {
+                    params: {
+                        company_name: empresa,
+                        estado: filtros.estado,
+                    },
+                });
                 setDocumentos(response.data);
             } catch (error) {
                 console.error('Error fetching documentos:', error);
@@ -36,7 +41,7 @@ const ContadorModule = () => {
         if (empresa) {
             fetchDocumentos();
         }
-    }, [empresa]);
+    }, [empresa, filtros.estado]);
 
     const handleFiltroChange = (e) => {
         setFiltros({
@@ -143,10 +148,6 @@ const ContadorModule = () => {
             <Table striped bordered hover>
                 <thead>
                     <tr>
-                        {/* <th>Fecha Solicitud</th>
-                        <th>DNI</th>
-                        <th>Usuario</th>
-                        <th>Gerencia</th> */}
                         <th>RUC</th>
                         <th>Proveedor</th>
                         <th>Fecha Emisión</th>
@@ -160,12 +161,6 @@ const ContadorModule = () => {
                         <th>No Gravadas</th>
                         <th>Importe Facturado</th>
                         <th>TC</th>
-                        {/* <th>Anticipo</th>
-                        <th>Total</th>
-                        <th>Pago</th>
-                        <th>Detalle</th>
-                        <th>Estado</th>
-                        <th>Empresa</th> */}
                         <th>Archivo</th>
                         <th>Actualizar Estado</th>
                         <th>Exportar</th>
@@ -178,10 +173,6 @@ const ContadorModule = () => {
                         (!filtros.fechaRegistro || doc.fecha_solicitud.includes(filtros.fechaRegistro))
                     ).map((documento) => (
                         <tr key={documento.id}>
-                            {/* <td>{documento.fecha_solicitud}</td>
-                            <td>{documento.dni}</td>
-                            <td>{documento.usuario}</td>
-                            <td>{documento.gerencia}</td> */}
                             <td>{documento.ruc}</td>
                             <td>{documento.proveedor}</td>
                             <td>{documento.fecha_emision}</td>
@@ -195,12 +186,6 @@ const ContadorModule = () => {
                             <td>{documento.no_gravadas}</td>
                             <td>{documento.importe_facturado}</td>
                             <td>{documento.tc}</td>
-                            {/* <td>{documento.anticipo}</td>
-                            <td>{documento.total}</td>
-                            <td>{documento.pago}</td>
-                            <td>{documento.detalle}</td>
-                            <td>{documento.estado}</td>
-                            <td>{documento.empresa}</td> */}
                             <td>
                                 {documento.archivo && (
                                     <Button variant="link" onClick={() => handleViewFile(documento)}>
@@ -232,7 +217,6 @@ const ContadorModule = () => {
                 </tbody>
             </Table>
 
-            {/* Modal para ver el archivo */}
             {selectedDocumento && (
                 <Modal show={showModal} onHide={handleCloseModal}>
                     <Modal.Header closeButton>
