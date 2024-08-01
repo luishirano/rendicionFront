@@ -1,5 +1,4 @@
 // src/components/Login.js
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
@@ -16,7 +15,9 @@ const Login = () => {
             localStorage.setItem('token', response.data.access_token);
             const userResponse = await api.get('/users/me/');
             const user = userResponse.data;
-            if (user.role === 'contador') {
+            if (user.role === 'admin') {
+                navigate('/admin');
+            } else if (user.role === 'contador') {
                 navigate('/contador');
             } else if (user.role === 'colaborador') {
                 navigate('/colaborador');
