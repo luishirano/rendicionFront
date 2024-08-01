@@ -14,6 +14,10 @@ const Home = ({ user }) => {
         navigate('/colaborador/historial');
     };
 
+    if (!user) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <div style={{ textAlign: 'center', marginTop: '50px' }}>
             <h1>Bienvenido, {user.full_name}</h1>
