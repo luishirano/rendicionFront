@@ -33,7 +33,8 @@ function App() {
                 <Route path="/contador" element={<ContadorModule user={user} />} />
                 <Route path="/colaborador/*" element={<ColaboradorModule user={user} />} />
                 <Route path="/admin" element={<AdminDashboard user={user} />} />
-                <Route path="/" element={<Home user={user} />} />
+                <Route path="/" element={<Login />} />
+                {/* <Route path="/" element={<Home user={user} />} /> */}
             </Routes>
         </Router>
     );
