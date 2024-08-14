@@ -1,0 +1,20 @@
+.table-sm th, .table-sm td {
+    font-size: 12px;
+}
+
+p {
+    font-size: 12px;
+}
+
+button {
+    font-size: 12px;
+}
+
+form {
+    font-size: 12px;
+}
+
+.table-sm th,
+.table-sm td {
+    font-size: 10px;
+}

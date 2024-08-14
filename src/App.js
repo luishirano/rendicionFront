@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -7,6 +6,8 @@ import ContadorModule from './components/ContadorModule';
 import ColaboradorModule from './components/ColaboradorModule';
 import Home from './components/Home';
 import AdminDashboard from './components/AdminDashboard';
+import RendicionGastos from './components/RendicionGastos';
+import DatosRecibo from './components/DatosRecibo';
 import './index.css';
 import api from './api';
 
@@ -33,8 +34,9 @@ function App() {
                 <Route path="/contador" element={<ContadorModule user={user} />} />
                 <Route path="/colaborador/*" element={<ColaboradorModule user={user} />} />
                 <Route path="/admin" element={<AdminDashboard user={user} />} />
+                <Route path="/rendicion-gastos" element={<RendicionGastos />} />
+                <Route path="/datos-recibo" element={<DatosRecibo />} />
                 <Route path="/" element={<Login />} />
-                {/* <Route path="/" element={<Home user={user} />} /> */}
             </Routes>
         </Router>
     );

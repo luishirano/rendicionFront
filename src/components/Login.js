@@ -1,4 +1,3 @@
-// src/components/Login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
@@ -34,10 +33,10 @@ const Login = () => {
     return (
         <Container className="mt-5">
             <div className="text-center mb-4">
-                <h1 style={{ color: '#0056b3' }}>Registre sus datos</h1>
+                <h1 style={{ color: '#0056b3' }}>Bienvenido</h1>
             </div>
             {error && <Alert variant="danger">{error}</Alert>}
-            <Form onSubmit={handleSubmit} className="p-4" style={{ backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+            <Form onSubmit={handleSubmit} className="p-4" style={{ backgroundColor: '#d5d8dc', borderRadius: '8px' }}>
                 <Form.Group controlId="formEmail" className="mb-3">
                     <Form.Label>Email</Form.Label>
                     <Form.Control

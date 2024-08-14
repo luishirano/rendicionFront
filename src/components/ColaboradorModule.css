@@ -1,0 +1,39 @@
+.card {
+    border: none;
+}
+
+.card-body {
+    color: #0056b3; /* Azul */
+}
+
+.loading {
+    text-align: center;
+    font-size: 1.5rem;
+    color: #0056b3; /* Azul */
+}
+
+.container {
+    max-width: 800px;
+}
+
+.btn-primary {
+    background-color: #0056b3; /* Azul */
+    border-color: #0056b3; /* Azul */
+}
+
+.btn-secondary {
+    background-color: #6c757d; /* Gris */
+    border-color: #6c757d; /* Gris */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3; /* Azul oscuro */
+    border-color: #0056b3; /* Azul oscuro */
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268; /* Gris oscuro */
+    border-color: #545b62; /* Gris oscuro */
+}
+
+
