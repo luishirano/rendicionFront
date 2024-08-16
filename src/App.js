@@ -8,6 +8,9 @@ import Home from './components/Home';
 import AdminDashboard from './components/AdminDashboard';
 import RendicionGastos from './components/RendicionGastos';
 import DatosRecibo from './components/DatosRecibo';
+import Movilidad from './components/Movilidad'; // Importa el componente Movilidad
+import AnticiposViajes from './components/AnticiposViajes'; // Importa el componente AnticiposViajes
+import AnticiposGastosLocales from './components/AnticiposGastosLocales'; // Importa el nuevo componente AnticiposGastosLocales
 import './index.css';
 import api from './api';
 
@@ -33,6 +36,9 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/contador" element={<ContadorModule user={user} />} />
                 <Route path="/colaborador/*" element={<ColaboradorModule user={user} />} />
+                <Route path="/colaborador/movilidad" element={<Movilidad />} /> {/* Añadida esta línea */}
+                <Route path="/colaborador/anticipos-viajes" element={<AnticiposViajes />} /> {/* Añadida esta línea */}
+                <Route path="/colaborador/anticipos-gastos-locales" element={<AnticiposGastosLocales />} /> {/* Añadida esta línea */}
                 <Route path="/admin" element={<AdminDashboard user={user} />} />
                 <Route path="/rendicion-gastos" element={<RendicionGastos />} />
                 <Route path="/datos-recibo" element={<DatosRecibo />} />

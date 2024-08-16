@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import api, { getUsersByCompanyAndRole } from '../api';
 import { Table, Form, Button, Container, Row, Col, Modal } from 'react-bootstrap';
-import './ContadorModule.css'; // Importa tu archivo CSS personalizado
+import './ContadorModule.css';
+import lupaIcon from '../assets/lupa-icon.png'; // Asegúrate de tener esta imagen en la carpeta 'assets'
 
 const ContadorModule = () => {
     const [user, setUser] = useState(null);
@@ -14,7 +15,6 @@ const ContadorModule = () => {
     const [filtros, setFiltros] = useState({
         colaborador: '',
         estado: 'PENDIENTE',
-        fechaRegistro: '',
     });
 
     useEffect(() => {
@@ -140,10 +140,9 @@ const ContadorModule = () => {
     };
 
     return (
-        <Container fluid className="mt-5">
-            {/* <h1>Contador</h1> */}
+        <Container fluid className="mt-5 contador-container">
             {selectedColaborador && (
-                <div className="mb-4">
+                <div className="mb-4 contador-info">
                     <Row>
                         <Col>
                             <p><strong>Nombre:</strong> {selectedColaborador.full_name}</p>
@@ -154,9 +153,13 @@ const ContadorModule = () => {
                         <Col>
                             <p><strong>Compañía:</strong> {selectedColaborador.company_name}</p>
                         </Col>
-                        <Col>
-                            <Button variant="danger" onClick={handleExportPDF}>Exportar PDF</Button>
-                            <Button variant="primary" onClick={handleExportExcel} className="ms-2">Exportar Excel</Button>
+                        <Col className="text-end">
+                            <Button variant="danger" className="me-2 btn-export" onClick={handleExportPDF}>
+                                Exportar PDF
+                            </Button>
+                            <Button variant="success" className="btn-export" onClick={handleExportExcel}>
+                                Exportar Excel
+                            </Button>
                         </Col>
                     </Row>
                 </div>
@@ -169,6 +172,7 @@ const ContadorModule = () => {
                             name="colaborador"
                             value={filtros.colaborador}
                             onChange={handleFiltroChange}
+                            className="filtro-select"
                         >
                             <option value="">Buscar por colaborador</option>
                             {colaboradores.map(colaborador => (
@@ -184,6 +188,7 @@ const ContadorModule = () => {
                             name="estado"
                             value={filtros.estado}
                             onChange={handleFiltroChange}
+                            className="filtro-select"
                         >
                             <option value="PENDIENTE">PENDIENTE</option>
                             <option value="APROBADO">APROBADO</option>
@@ -191,19 +196,10 @@ const ContadorModule = () => {
                             <option value="RECHAZADO">RECHAZADO</option>
                         </Form.Control>
                     </Col>
-                    <Col>
-                        <Form.Control
-                            type="date"
-                            name="fechaRegistro"
-                            placeholder="Fecha de Registro"
-                            value={filtros.fechaRegistro}
-                            onChange={handleFiltroChange}
-                        />
-                    </Col>
                 </Row>
             </Form>
-            <Table striped bordered hover className="table-sm">
-                <thead>
+            <Table striped bordered hover className="table-sm contador-table">
+                <thead className="table-header">
                     <tr>
                         <th>Item</th>
                         <th>Fecha</th>
@@ -226,8 +222,7 @@ const ContadorModule = () => {
                 <tbody>
                     {documentos.filter(doc => 
                         (!filtros.colaborador || doc.usuario.includes(filtros.colaborador)) &&
-                        (!filtros.estado || doc.estado.includes(filtros.estado)) &&
-                        (!filtros.fechaRegistro || doc.fecha_solicitud.includes(filtros.fechaRegistro))
+                        (!filtros.estado || doc.estado.includes(filtros.estado))
                     ).map((documento, index) => (
                         <tr key={documento.id}>
                             <td>{index + 1}</td>
@@ -244,10 +239,10 @@ const ContadorModule = () => {
                             <td>{documento.igv}</td>
                             <td>{documento.inafecto}</td>
                             <td>{documento.total}</td>
-                            <td>
+                            <td className="text-center">
                                 {documento.archivo && (
-                                    <Button variant="link" onClick={() => handleViewFile(documento)}>
-                                        Ver Archivo
+                                    <Button variant="link" className="link-button" onClick={() => handleViewFile(documento)}>
+                                        <img src={lupaIcon} alt="Ver Archivo" className="icon-lupa" />
                                     </Button>
                                 )}
                             </td>
@@ -256,11 +251,12 @@ const ContadorModule = () => {
                                     as="select"
                                     value={documento.estado}
                                     onChange={(e) => handleEstadoChange(documento.id, e.target.value)}
+                                    className="estado-select"
                                 >
-                                     <option value="PENDIENTE">PENDIENTE</option>
-                                     <option value="APROBADO">APROBADO</option>
-                                     <option value="RENDIDO">RENDIDO</option>
-                                     <option value="RECHAZADO">RECHAZADO</option>
+                                    <option value="PENDIENTE">PENDIENTE</option>
+                                    <option value="APROBADO">APROBADO</option>
+                                    <option value="RENDIDO">RENDIDO</option>
+                                    <option value="RECHAZADO">RECHAZADO</option>
                                 </Form.Control>
                             </td>
                         </tr>

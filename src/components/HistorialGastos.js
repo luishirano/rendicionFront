@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import { Table, Form } from 'react-bootstrap';
+import { Table, Form, Container } from 'react-bootstrap';
+import './HistorialGastos.css';
 
 const HistorialGastos = ({ username, companyName }) => {
     const [documentos, setDocumentos] = useState([]);
@@ -30,9 +31,9 @@ const HistorialGastos = ({ username, companyName }) => {
     };
 
     return (
-        <div className="container mt-4">
-            <h1>Historial de Gastos</h1>
-            <Form.Group controlId="estadoSelect" className="mb-3">
+        <Container className="mt-4">
+            <h1 className="text-center mb-4">Historial de Gastos</h1>
+            <Form.Group controlId="estadoSelect" className="mb-4">
                 <Form.Label>Filtrar por Estado</Form.Label>
                 <Form.Control as="select" value={estado} onChange={handleEstadoChange}>
                     <option value="">Todos</option>
@@ -41,8 +42,8 @@ const HistorialGastos = ({ username, companyName }) => {
                     <option value="ABONADO">ABONADO</option>
                 </Form.Control>
             </Form.Group>
-            <Table striped bordered hover className="table-sm">
-                <thead>
+            <Table striped bordered hover className="table-sm text-center">
+                <thead className="table-header">
                     <tr>
                         <th>RUC</th>
                         <th>Proveedor</th>
@@ -79,7 +80,7 @@ const HistorialGastos = ({ username, companyName }) => {
                     ))}
                 </tbody>
             </Table>
-        </div>
+        </Container>
     );
 };
 

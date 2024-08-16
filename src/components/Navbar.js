@@ -5,7 +5,7 @@ import logo from '../assets/images/logo.png';
 const Navbar = () => (
     <nav className="navbar navbar-expand-lg navbar-dark" style={{ paddingLeft: '20px', paddingRight: '20px' }}>
         <Link className="navbar-brand" to="/" style={{ marginLeft: '10px' }}>
-            <img src={logo} alt="Logo" style={{ height: '60px' }} /> {/* Ajusta la altura según sea necesario */}
+            <img src={logo} alt="Logo" style={{ height: '120px' }} /> {/* Ajusta la altura según sea necesario */}
         </Link>
         <div className="collapse navbar-collapse justify-content-end">
             <ul className="navbar-nav">

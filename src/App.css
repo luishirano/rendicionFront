@@ -1,22 +1,24 @@
+/* Alineación de texto */
 .App {
   text-align: center;
 }
 
-
-
+/* Estilo del logo */
 .App-logo {
   height: 40vmin;
   pointer-events: none;
 }
 
+/* Animación del logo */
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
 }
 
+/* Encabezado de la aplicación */
 .App-header {
-  background-color: #282c34;
+  background-color: #1A3B63; /* Azul Oscuro */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -26,10 +28,12 @@
   color: white;
 }
 
+/* Enlaces de la aplicación */
 .App-link {
-  color: #0056b3;
+  color: #3A699A; /* Azul Medio */
 }
 
+/* Animación del logo */
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
