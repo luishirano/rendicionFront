@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Form, Button } from 'react-bootstrap';
+import axios from 'axios';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button as MuiButton } from '@mui/material';
 import './Movilidad.css'; // Importa tu archivo CSS personalizado
 
 const Movilidad = () => {
@@ -13,6 +15,10 @@ const Movilidad = () => {
         total: ''
     });
 
+    const [responseMessage, setResponseMessage] = useState(''); // Para manejar la respuesta de la API
+    const [isLoading, setIsLoading] = useState(false); // Estado para manejar la carga
+    const [open, setOpen] = useState(false); // Estado para controlar el popup
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -21,10 +27,25 @@ const Movilidad = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Aquí puedes manejar el envío del formulario
-        console.log(formData);
+        setIsLoading(true);
+
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/documentos/', formData);
+            setResponseMessage('Documento creado correctamente.');
+            setOpen(true); // Abre el popup cuando se crea el documento exitosamente
+        } catch (error) {
+            setResponseMessage('Error al crear el documento.');
+            console.error('Error:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        window.history.back(); // Retrocede una vez en el historial del navegador
     };
 
     return (
@@ -114,10 +135,23 @@ const Movilidad = () => {
                     />
                 </Form.Group>
 
-                <Button variant="primary" type="submit" className="btn-block">
-                    Enviar
+                <Button variant="primary" type="submit" className="btn-block" disabled={isLoading}>
+                    {isLoading ? 'Enviando...' : 'Enviar'}
                 </Button>
             </Form>
+
+            {/* Popup de Material-UI */}
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Registro Exitoso</DialogTitle>
+                <DialogContent>
+                    <p>{responseMessage}</p>
+                </DialogContent>
+                <DialogActions>
+                    <MuiButton onClick={handleClose} color="primary">
+                        OK
+                    </MuiButton>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };

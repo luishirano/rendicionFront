@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Form, Button } from 'react-bootstrap';
+import axios from 'axios';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button as MuiButton } from '@mui/material';
 import './AnticiposGastosLocales.css'; // Puedes crear un archivo CSS personalizado si es necesario
 
 const AnticiposGastosLocales = () => {
@@ -10,11 +12,15 @@ const AnticiposGastosLocales = () => {
         area: '',
         ceco: '',
         motivo: '',
-        moneda: 'PEN',  // Valor predeterminado
+        moneda: 'PEN',
         presupuesto: '',
         banco: '',
-        numeroCuenta: ''
+        numero_cuenta: ''  // Asegúrate de que la clave coincide con el name del input
     });
+
+    const [responseMessage, setResponseMessage] = useState(''); // Para manejar la respuesta de la API
+    const [isLoading, setIsLoading] = useState(false); // Estado para manejar la carga
+    const [open, setOpen] = useState(false); // Estado para controlar el popup
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,10 +30,25 @@ const AnticiposGastosLocales = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Aquí puedes manejar el envío del formulario
-        console.log(formData);
+        setIsLoading(true);
+
+        try {
+            const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf/', formData);
+            setResponseMessage('Documento creado y guardado en PDF correctamente.');
+            setOpen(true); // Abre el popup cuando se crea el documento exitosamente
+        } catch (error) {
+            setResponseMessage('Error al crear el documento.');
+            console.error('Error:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        window.history.back(); // Retrocede una vez en el historial del navegador
     };
 
     return (
@@ -148,18 +169,31 @@ const AnticiposGastosLocales = () => {
                     <Form.Label>Número de Cuenta</Form.Label>
                     <Form.Control 
                         type="text" 
-                        name="numeroCuenta" 
+                        name="numero_cuenta"  // Cambiado para que coincida con la clave en formData
                         placeholder="Ingrese el número de cuenta" 
-                        value={formData.numeroCuenta} 
+                        value={formData.numero_cuenta} 
                         onChange={handleChange} 
                         required 
                     />
                 </Form.Group>
 
-                <Button variant="primary" type="submit" className="btn-block">
-                    Enviar
+                <Button variant="primary" type="submit" className="btn-block" disabled={isLoading}>
+                    {isLoading ? 'Enviando...' : 'Enviar'}
                 </Button>
             </Form>
+
+            {/* Popup de Material-UI */}
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Registro Exitoso</DialogTitle>
+                <DialogContent>
+                    <p>{responseMessage}</p>
+                </DialogContent>
+                <DialogActions>
+                    <MuiButton onClick={handleClose} color="primary">
+                        OK
+                    </MuiButton>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };

@@ -15,6 +15,11 @@ const ContadorModule = () => {
     const [filtros, setFiltros] = useState({
         colaborador: '',
         estado: 'PENDIENTE',
+        tipo_gasto: '',
+        tipo_documento: '',
+        tipo_anticipo: '',
+        fechaDesde: '',
+        fechaHasta: ''
     });
 
     useEffect(() => {
@@ -45,6 +50,11 @@ const ContadorModule = () => {
                             company_name: empresa,
                             estado: filtros.estado,
                             username: filtros.colaborador,
+                            tipo_gasto: filtros.tipo_gasto,
+                            tipo_documento: filtros.tipo_documento,
+                            tipo_anticipo: filtros.tipo_anticipo,
+                            fecha_solicitud_from: filtros.fechaDesde,
+                            fecha_solicitud_to: filtros.fechaHasta
                         },
                     });
                     setDocumentos(response.data);
@@ -196,6 +206,68 @@ const ContadorModule = () => {
                             <option value="RECHAZADO">RECHAZADO</option>
                         </Form.Control>
                     </Col>
+
+
+                    <Col>
+            <Form.Control
+                as="select"
+                name="tipo_gasto"
+                value={filtros.tipo_gasto}
+                onChange={handleFiltroChange}
+                className="filtro-select"
+            >
+                <option value="">Seleccionar Tipo de Gasto</option>
+                {/* Opciones del tipo de gasto aquí */}
+            </Form.Control>
+        </Col>
+
+   <Col>
+            <Form.Control
+                as="select"
+                name="tipo_documento"
+                value={filtros.tipo_documento}
+                onChange={handleFiltroChange}
+                className="filtro-select"
+            >
+                <option value="">Seleccionar Tipo de Documento</option>
+                {/* Opciones del tipo de documento aquí */}
+            </Form.Control>
+        </Col>
+
+        
+        <Col>
+            <Form.Control
+                as="select"
+                name="tipo_anticipo"
+                value={filtros.tipo_anticipo}
+                onChange={handleFiltroChange}
+                className="filtro-select"
+            >
+                <option value="">Seleccionar Tipo de Anticipo</option>
+                {/* Opciones del tipo de anticipo aquí */}
+            </Form.Control>
+        </Col>
+        <Col>
+            <Form.Control
+                type="date"
+                name="fechaDesde"
+                value={filtros.fechaDesde}
+                onChange={handleFiltroChange}
+                className="filtro-select"
+            />
+        </Col>
+        <Col>
+            <Form.Control
+                type="date"
+                name="fechaHasta"
+                value={filtros.fechaHasta}
+                onChange={handleFiltroChange}
+                className="filtro-select"
+            />
+        </Col>
+
+
+
                 </Row>
             </Form>
             <Table striped bordered hover className="table-sm contador-table">
@@ -220,48 +292,49 @@ const ContadorModule = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {documentos.filter(doc => 
-                        (!filtros.colaborador || doc.usuario.includes(filtros.colaborador)) &&
-                        (!filtros.estado || doc.estado.includes(filtros.estado))
-                    ).map((documento, index) => (
-                        <tr key={documento.id}>
-                            <td>{index + 1}</td>
-                            <td>{documento.fecha_emision}</td>
-                            <td>{documento.ruc}</td>
-                            <td>{documento.tipo_documento}</td>
-                            <td>{documento.cuenta_contable}</td>
-                            <td>{documento.serie}</td>
-                            <td>{documento.correlativo}</td>
-                            <td>{documento.rubro}</td>
-                            <td>{documento.moneda}</td>
-                            <td>{documento.tipo_cambio}</td>
-                            <td>{documento.afecto}</td>
-                            <td>{documento.igv}</td>
-                            <td>{documento.inafecto}</td>
-                            <td>{documento.total}</td>
-                            <td className="text-center">
-                                {documento.archivo && (
-                                    <Button variant="link" className="link-button" onClick={() => handleViewFile(documento)}>
-                                        <img src={lupaIcon} alt="Ver Archivo" className="icon-lupa" />
-                                    </Button>
-                                )}
-                            </td>
-                            <td>
-                                <Form.Control
-                                    as="select"
-                                    value={documento.estado}
-                                    onChange={(e) => handleEstadoChange(documento.id, e.target.value)}
-                                    className="estado-select"
-                                >
-                                    <option value="PENDIENTE">PENDIENTE</option>
-                                    <option value="APROBADO">APROBADO</option>
-                                    <option value="RENDIDO">RENDIDO</option>
-                                    <option value="RECHAZADO">RECHAZADO</option>
-                                </Form.Control>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
+    {documentos.filter(doc => 
+        (!filtros.colaborador || (doc.usuario && doc.usuario.includes(filtros.colaborador))) &&
+        (!filtros.estado || (doc.estado && doc.estado.includes(filtros.estado)))
+    ).map((documento, index) => (
+        <tr key={documento.id}>
+            <td>{index + 1}</td>
+            <td>{documento.fecha_emision}</td>
+            <td>{documento.ruc}</td>
+            <td>{documento.tipo_documento}</td>
+            <td>{documento.cuenta_contable}</td>
+            <td>{documento.serie}</td>
+            <td>{documento.correlativo}</td>
+            <td>{documento.rubro}</td>
+            <td>{documento.moneda}</td>
+            <td>{documento.tipo_cambio}</td>
+            <td>{documento.afecto}</td>
+            <td>{documento.igv}</td>
+            <td>{documento.inafecto}</td>
+            <td>{documento.total}</td>
+            <td className="text-center">
+                {documento.archivo && (
+                    <Button variant="link" className="link-button" onClick={() => handleViewFile(documento)}>
+                        <img src={lupaIcon} alt="Ver Archivo" className="icon-lupa" />
+                    </Button>
+                )}
+            </td>
+            <td>
+                <Form.Control
+                    as="select"
+                    value={documento.estado}
+                    onChange={(e) => handleEstadoChange(documento.id, e.target.value)}
+                    className="estado-select"
+                >
+                    <option value="PENDIENTE">PENDIENTE</option>
+                    <option value="APROBADO">APROBADO</option>
+                    <option value="RENDIDO">RENDIDO</option>
+                    <option value="RECHAZADO">RECHAZADO</option>
+                </Form.Control>
+            </td>
+        </tr>
+    ))}
+</tbody>
+
             </Table>
 
             {selectedDocumento && (

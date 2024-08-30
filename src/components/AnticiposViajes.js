@@ -1,25 +1,46 @@
 import React, { useState } from 'react';
 import { Container, Form, Button } from 'react-bootstrap';
-import './AnticiposViajes.css'; // Puedes crear un archivo CSS personalizado si es necesario
+import axios from 'axios';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button as MuiButton } from '@mui/material'; // Importa Material-UI para el popup
+import './AnticiposViajes.css';
+
+
 
 const AnticiposViajes = () => {
+
+    const getCurrentDate = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = (`0${today.getMonth() + 1}`).slice(-2); // Asegura dos dígitos
+        const day = (`0${today.getDate()}`).slice(-2); // Asegura dos dígitos
+        return `${year}-${month}-${day}`;
+    }; 
+
     const [formData, setFormData] = useState({
+        usuario: 'colauser1@gmail.com',
         dni: '',
         responsable: '',
         gerencia: '',
         area: '',
         ceco: '',
-        tipoAnticipo: '',
+        tipo_anticipo: '',
         destino: '',
         motivo: '',
-        fechaViaje: '',
+        empresa: 'innova',
+        estado: 'PENDIENTE',
+        fecha_viaje: '',
         dias: '',
-        moneda: 'PEN',  // Valor predeterminado
+        moneda: 'PEN',
         presupuesto: '',
         total: '',
         banco: '',
-        numeroCuenta: ''
+        numero_cuenta: '',
+        fecha_solicitud: getCurrentDate()
     });
+
+    const [responseMessage, setResponseMessage] = useState(''); // Para manejar la respuesta de la API
+    const [isLoading, setIsLoading] = useState(false); // Estado para manejar la carga
+    const [open, setOpen] = useState(false); // Estado para controlar el popup
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -29,10 +50,25 @@ const AnticiposViajes = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Aquí puedes manejar el envío del formulario
-        console.log(formData);
+        setIsLoading(true);
+
+        try {
+            const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf/', formData);
+            setResponseMessage('Documento creado y guardado en PDF correctamente.');
+            setOpen(true); // Abre el popup cuando se crea el documento exitosamente
+        } catch (error) {
+            setResponseMessage('Error al crear el documento.');
+            console.error('Error:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        window.history.back(); // Retrocede una vez en el historial del navegador
     };
 
     return (
@@ -103,9 +139,9 @@ const AnticiposViajes = () => {
                     <Form.Label>Tipo de Anticipo</Form.Label>
                     <Form.Control 
                         type="text" 
-                        name="tipoAnticipo" 
+                        name="tipo_anticipo" 
                         placeholder="Ingrese el tipo de anticipo" 
-                        value={formData.tipoAnticipo} 
+                        value={formData.tipo_anticipo} 
                         onChange={handleChange} 
                         required 
                     />
@@ -139,8 +175,8 @@ const AnticiposViajes = () => {
                     <Form.Label>Fecha de Viaje</Form.Label>
                     <Form.Control 
                         type="date" 
-                        name="fechaViaje" 
-                        value={formData.fechaViaje} 
+                        name="fecha_viaje" 
+                        value={formData.fecha_viaje} 
                         onChange={handleChange} 
                         required 
                     />
@@ -212,18 +248,31 @@ const AnticiposViajes = () => {
                     <Form.Label>Número de Cuenta</Form.Label>
                     <Form.Control 
                         type="text" 
-                        name="numeroCuenta" 
+                        name="numero_cuenta" 
                         placeholder="Ingrese el número de cuenta" 
-                        value={formData.numeroCuenta} 
+                        value={formData.numero_cuenta} 
                         onChange={handleChange} 
                         required 
                     />
                 </Form.Group>
 
-                <Button variant="primary" type="submit" className="btn-block">
-                    Enviar
+                <Button variant="primary" type="submit" className="btn-block" disabled={isLoading}>
+                    {isLoading ? 'Enviando...' : 'Enviar'}
                 </Button>
             </Form>
+
+            {/* Popup de Material-UI */}
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Registro Exitoso</DialogTitle>
+                <DialogContent>
+                    <p>{responseMessage}</p>
+                </DialogContent>
+                <DialogActions>
+                    <MuiButton onClick={handleClose} color="primary">
+                        OK
+                    </MuiButton>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };
