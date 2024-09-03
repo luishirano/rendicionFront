@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import { Table, Form, Container } from 'react-bootstrap';
-import './HistorialGastos.css';
+import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Select, MenuItem, FormControl, InputLabel, Typography, Paper } from '@mui/material';
 
 const HistorialGastos = ({ username, companyName }) => {
     const [documentos, setDocumentos] = useState([]);
@@ -31,55 +30,65 @@ const HistorialGastos = ({ username, companyName }) => {
     };
 
     return (
-        <Container className="mt-4">
-            <h1 className="text-center mb-4">Historial de Gastos</h1>
-            <Form.Group controlId="estadoSelect" className="mb-4">
-                <Form.Label>Filtrar por Estado</Form.Label>
-                <Form.Control as="select" value={estado} onChange={handleEstadoChange}>
-                    <option value="">Todos</option>
-                    <option value="PENDIENTE">PENDIENTE</option>
-                    <option value="CANCELADO">CANCELADO</option>
-                    <option value="ABONADO">ABONADO</option>
-                </Form.Control>
-            </Form.Group>
-            <Table striped bordered hover className="table-sm text-center">
-                <thead className="table-header">
-                    <tr>
-                        <th>RUC</th>
-                        <th>Proveedor</th>
-                        <th>Fecha Emisión</th>
-                        <th>Moneda</th>
-                        <th>Tipo Documento</th>
-                        <th>Serie</th>
-                        <th>Correlativo</th>
-                        <th>Tipo Gasto</th>
-                        <th>Sub Total</th>
-                        <th>IGV</th>
-                        <th>No Gravadas</th>
-                        <th>Importe Facturado</th>
-                        <th>TC</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {documentos.map((documento) => (
-                        <tr key={documento.id}>
-                            <td>{documento.ruc}</td>
-                            <td>{documento.proveedor}</td>
-                            <td>{documento.fecha_emision}</td>
-                            <td>{documento.moneda}</td>
-                            <td>{documento.tipo_documento}</td>
-                            <td>{documento.serie}</td>
-                            <td>{documento.correlativo}</td>
-                            <td>{documento.tipo_gasto}</td>
-                            <td>{documento.sub_total}</td>
-                            <td>{documento.igv}</td>
-                            <td>{documento.no_gravadas}</td>
-                            <td>{documento.importe_facturado}</td>
-                            <td>{documento.tc}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
+        <Container sx={{ marginTop: 4 }}>
+            <Typography variant="h4" align="center" gutterBottom>
+                Historial de Gastos
+            </Typography>
+            <FormControl fullWidth sx={{ marginBottom: 4 }}>
+                <InputLabel id="estado-label">Filtrar por Estado</InputLabel>
+                <Select
+                    labelId="estado-label"
+                    id="estadoSelect"
+                    value={estado}
+                    label="Filtrar por Estado"
+                    onChange={handleEstadoChange}
+                >
+                    <MenuItem value="">Todos</MenuItem>
+                    <MenuItem value="PENDIENTE">PENDIENTE</MenuItem>
+                    <MenuItem value="CANCELADO">CANCELADO</MenuItem>
+                    <MenuItem value="ABONADO">ABONADO</MenuItem>
+                </Select>
+            </FormControl>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align="center">RUC</TableCell>
+                            <TableCell align="center">Proveedor</TableCell>
+                            <TableCell align="center">Fecha Emisión</TableCell>
+                            <TableCell align="center">Moneda</TableCell>
+                            <TableCell align="center">Tipo Documento</TableCell>
+                            <TableCell align="center">Serie</TableCell>
+                            <TableCell align="center">Correlativo</TableCell>
+                            <TableCell align="center">Tipo Gasto</TableCell>
+                            <TableCell align="center">Sub Total</TableCell>
+                            <TableCell align="center">IGV</TableCell>
+                            <TableCell align="center">No Gravadas</TableCell>
+                            <TableCell align="center">Importe Facturado</TableCell>
+                            <TableCell align="center">TC</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {documentos.map((documento) => (
+                            <TableRow key={documento.id}>
+                                <TableCell align="center">{documento.ruc}</TableCell>
+                                <TableCell align="center">{documento.proveedor}</TableCell>
+                                <TableCell align="center">{documento.fecha_emision}</TableCell>
+                                <TableCell align="center">{documento.moneda}</TableCell>
+                                <TableCell align="center">{documento.tipo_documento}</TableCell>
+                                <TableCell align="center">{documento.serie}</TableCell>
+                                <TableCell align="center">{documento.correlativo}</TableCell>
+                                <TableCell align="center">{documento.tipo_gasto}</TableCell>
+                                <TableCell align="center">{documento.sub_total}</TableCell>
+                                <TableCell align="center">{documento.igv}</TableCell>
+                                <TableCell align="center">{documento.no_gravadas}</TableCell>
+                                <TableCell align="center">{documento.importe_facturado}</TableCell>
+                                <TableCell align="center">{documento.tc}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </Container>
     );
 };

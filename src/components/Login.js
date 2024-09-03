@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { Container, Form, Button, Alert } from 'react-bootstrap';
+import { Container, TextField, Button, Box, Typography, Alert } from '@mui/material';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -31,41 +31,50 @@ const Login = () => {
     };
 
     return (
-        <Container className="mt-5">
-            <div className="text-center mb-4">
-                <h1 style={{ color: '#0056b3' }}>Bienvenido</h1>
-            </div>
-            {error && <Alert variant="danger">{error}</Alert>}
-            <Form onSubmit={handleSubmit} className="p-4" style={{ backgroundColor: '#d5d8dc', borderRadius: '8px' }}>
-                <Form.Group controlId="formEmail" className="mb-3">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Ingrese su email"
-                        required
-                    />
-                </Form.Group>
-                <Form.Group controlId="formPassword" className="mb-3">
-                    <Form.Label>Contraseña</Form.Label>
-                    <Form.Control
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Ingrese su contraseña"
-                        required
-                    />
-                </Form.Group>
+        <Container maxWidth="sm">
+            <Box sx={{ mt: '80px', textAlign: 'center' }}>  {/* Ajustar margen superior para evitar superposición */}
+                <Typography variant="h4" component="h1" gutterBottom>
+                    Bienvenido
+                </Typography>
+            </Box>
+            {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+            <Box component="form" onSubmit={handleSubmit} sx={{ p: 4, backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
+                <TextField
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email"
+                    name="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    autoFocus
+                />
+                <TextField
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    fullWidth
+                    name="password"
+                    label="Contraseña"
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                />
                 <Button
                     type="submit"
-                    variant="primary"
-                    style={{ backgroundColor: '#0056b3', borderColor: '#0056b3', marginBottom: '10px' }}
-                    block
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    sx={{ mt: 3, mb: 2 }}
                 >
                     Iniciar Sesión
                 </Button>
-            </Form>
+            </Box>
         </Container>
     );
 };

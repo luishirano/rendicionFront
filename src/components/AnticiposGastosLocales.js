@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { Container, Form, Button } from 'react-bootstrap';
+import { Container, Card, CardContent, TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import axios from 'axios';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button as MuiButton } from '@mui/material';
-import './AnticiposGastosLocales.css'; // Puedes crear un archivo CSS personalizado si es necesario
+import './AnticiposGastosLocales.css'; // Mantén tu archivo CSS personalizado si es necesario
 
 const AnticiposGastosLocales = () => {
     const [formData, setFormData] = useState({
         dni: '',
         responsable: '',
         gerencia: '',
+        tipo_anticipo: 'VIAJES',
+        empresa: 'innova',
+        estado: 'PENDIENTE',
         area: '',
         ceco: '',
         motivo: '',
@@ -35,7 +37,8 @@ const AnticiposGastosLocales = () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf/', formData);
+            // Cambiar la URL para apuntar a la nueva API
+            const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf-local/', formData);
             setResponseMessage('Documento creado y guardado en PDF correctamente.');
             setOpen(true); // Abre el popup cuando se crea el documento exitosamente
         } catch (error) {
@@ -52,146 +55,155 @@ const AnticiposGastosLocales = () => {
     };
 
     return (
-        <Container className="mt-4">
-            <h1 className="text-center mb-4">Anticipos Gastos Locales</h1>
-            <Form onSubmit={handleSubmit}>
-                <Form.Group controlId="dni" className="mb-3">
-                    <Form.Label>DNI</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="dni" 
-                        placeholder="Ingrese el DNI" 
-                        value={formData.dni} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
+        <Container maxWidth="sm" sx={{ marginTop: 10 }}> {/* Ajustar el padding superior */}
+            <Card sx={{ boxShadow: 3 }}>
+                <CardContent>
+                    <Typography variant="h4" component="h1" align="center" gutterBottom>
+                        Anticipos Gastos Locales
+                    </Typography>
+                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="dni"
+                            label="DNI"
+                            name="dni"
+                            value={formData.dni}
+                            onChange={handleChange}
+                            autoFocus
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="responsable"
+                            label="Responsable"
+                            name="responsable"
+                            value={formData.responsable}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="gerencia"
+                            label="Gerencia"
+                            name="gerencia"
+                            value={formData.gerencia}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="area"
+                            label="Área"
+                            name="area"
+                            value={formData.area}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="ceco"
+                            label="CECO"
+                            name="ceco"
+                            value={formData.ceco}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="motivo"
+                            label="Breve Motivo"
+                            name="motivo"
+                            value={formData.motivo}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="moneda"
+                            label="Moneda"
+                            name="moneda"
+                            select
+                            SelectProps={{
+                                native: true,
+                            }}
+                            value={formData.moneda}
+                            onChange={handleChange}
+                        >
+                            <option value="PEN">PEN</option>
+                            <option value="USD">USD</option>
+                        </TextField>
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="presupuesto"
+                            label="Presupuesto"
+                            name="presupuesto"
+                            type="number"
+                            value={formData.presupuesto}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="banco"
+                            label="Banco"
+                            name="banco"
+                            value={formData.banco}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="numero_cuenta"
+                            label="Número de Cuenta"
+                            name="numero_cuenta"
+                            value={formData.numero_cuenta}
+                            onChange={handleChange}
+                        />
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            disabled={isLoading}
+                            sx={{ mt: 3, mb: 2 }}
+                        >
+                            {isLoading ? 'Enviando...' : 'Enviar'}
+                        </Button>
+                    </Box>
+                </CardContent>
+            </Card>
 
-                <Form.Group controlId="responsable" className="mb-3">
-                    <Form.Label>Responsable</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="responsable" 
-                        placeholder="Ingrese el nombre del responsable" 
-                        value={formData.responsable} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="gerencia" className="mb-3">
-                    <Form.Label>Gerencia</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="gerencia" 
-                        placeholder="Ingrese la gerencia" 
-                        value={formData.gerencia} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="area" className="mb-3">
-                    <Form.Label>Área</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="area" 
-                        placeholder="Ingrese el área" 
-                        value={formData.area} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="ceco" className="mb-3">
-                    <Form.Label>CECO</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="ceco" 
-                        placeholder="Ingrese el CECO" 
-                        value={formData.ceco} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="motivo" className="mb-3">
-                    <Form.Label>Breve Motivo</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="motivo" 
-                        placeholder="Ingrese el motivo" 
-                        value={formData.motivo} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="moneda" className="mb-3">
-                    <Form.Label>Moneda</Form.Label>
-                    <Form.Control 
-                        as="select" 
-                        name="moneda" 
-                        value={formData.moneda} 
-                        onChange={handleChange} 
-                        required
-                    >
-                        <option value="PEN">PEN</option>
-                        <option value="USD">USD</option>
-                    </Form.Control>
-                </Form.Group>
-
-                <Form.Group controlId="presupuesto" className="mb-3">
-                    <Form.Label>Presupuesto</Form.Label>
-                    <Form.Control 
-                        type="number" 
-                        name="presupuesto" 
-                        placeholder="Ingrese el presupuesto" 
-                        value={formData.presupuesto} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="banco" className="mb-3">
-                    <Form.Label>Banco</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="banco" 
-                        placeholder="Ingrese el banco" 
-                        value={formData.banco} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="numeroCuenta" className="mb-3">
-                    <Form.Label>Número de Cuenta</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="numero_cuenta"  // Cambiado para que coincida con la clave en formData
-                        placeholder="Ingrese el número de cuenta" 
-                        value={formData.numero_cuenta} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Button variant="primary" type="submit" className="btn-block" disabled={isLoading}>
-                    {isLoading ? 'Enviando...' : 'Enviar'}
-                </Button>
-            </Form>
-
-            {/* Popup de Material-UI */}
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Registro Exitoso</DialogTitle>
                 <DialogContent>
-                    <p>{responseMessage}</p>
+                    <Typography>{responseMessage}</Typography>
                 </DialogContent>
                 <DialogActions>
-                    <MuiButton onClick={handleClose} color="primary">
+                    <Button onClick={handleClose} color="primary">
                         OK
-                    </MuiButton>
+                    </Button>
                 </DialogActions>
             </Dialog>
         </Container>

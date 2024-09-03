@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Container, Card, CardContent, Typography, TextField, Button, Alert, MenuItem } from '@mui/material';
 import axios from 'axios';
-import './DatosRecibo.css';
 import { jwtDecode } from 'jwt-decode';
+import './DatosRecibo.css';
 
 const DatosRecibo = () => {
     const location = useLocation();
@@ -34,7 +34,6 @@ const DatosRecibo = () => {
     const [qrFile, setQrFile] = useState(null);
 
     useEffect(() => {
-        // Calcular afecto cuando el valor de IGV cambia
         if (formData.igv) {
             const afectoValue = (parseFloat(formData.igv) / 0.18).toFixed(2);
             setFormData(prevFormData => ({
@@ -45,7 +44,6 @@ const DatosRecibo = () => {
     }, [formData.igv]);
 
     useEffect(() => {
-        // Si la moneda es USD, obtener el tipo de cambio
         if (formData.moneda === 'USD' && formData.fecha) {
             fetchTipoCambio(formData.fecha);
         }
@@ -101,7 +99,6 @@ const DatosRecibo = () => {
             formData.append('file', file);
     
             try {
-                // Primero, subir el archivo
                 const uploadResponse = await axios.post('http://127.0.0.1:8000/upload-file/', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -110,14 +107,12 @@ const DatosRecibo = () => {
     
                 const fileLocation = uploadResponse.data.file_location;
     
-                // Luego, decodificar el QR
                 const decodeResponse = await axios.post('http://localhost:8000/decode-qr/', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
                 });
     
-                // Asignar los datos del QR al formulario y la ruta del archivo
                 setFormData((prevFormData) => ({
                     ...prevFormData,
                     fecha: decodeResponse.data.fecha || '',
@@ -127,7 +122,7 @@ const DatosRecibo = () => {
                     numero: decodeResponse.data.numero || '',
                     igv: decodeResponse.data.igv || '',
                     total: decodeResponse.data.total || '',
-                    archivo: fileLocation // Asignar la ruta del archivo subido
+                    archivo: fileLocation
                 }));
     
                 setError('');
@@ -136,7 +131,7 @@ const DatosRecibo = () => {
             }
         }
     };
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -145,46 +140,40 @@ const DatosRecibo = () => {
 
         if (token) {
             const decodedToken = jwtDecode(token);
-            loggedInUser = decodedToken.sub; // Asegúrate de que "email" esté presente en el token
+            loggedInUser = decodedToken.sub;
         } else {
             console.error("Token not found in localStorage.");
         }
 
-        if (!loggedInUser) {
-            console.error("Failed to decode token or email not found.");
-        } else {
-            console.log("Logged in user:", loggedInUser);
-        }
-
-        const todayDate = new Date().toISOString().split('T')[0]; // Fecha actual en formato YYYY-MM-DD
+        const todayDate = new Date().toISOString().split('T')[0];
 
         const requestData = {
             fecha_solicitud: todayDate,
-            dni: formData.dni || "12345678", // El DNI debería ser obtenido si está disponible
+            dni: formData.dni || "12345678",
             usuario: loggedInUser,
-            gerencia: "Gerencia de Finanzas", // Podrías ajustar esto según sea necesario
+            gerencia: "Gerencia de Finanzas",
             ruc: formData.ruc,
-            proveedor: "Proveedor S.A.", // Podrías obtener esto dinámicamente
+            proveedor: "Proveedor S.A.",
             fecha_emision: formData.fecha,
-            moneda: formData.moneda || "PEN", // Asumiendo PEN si no se especifica
+            moneda: formData.moneda || "PEN",
             tipo_documento: formData.tipoDoc,
             serie: formData.serie,
             correlativo: formData.numero,
-            tipo_gasto: "Servicios", // Podrías ajustar esto según sea necesario
-            sub_total: parseFloat(formData.total) - parseFloat(formData.igv), // Calcula el sub_total restando el IGV del total
+            tipo_gasto: "Servicios",
+            sub_total: parseFloat(formData.total) - parseFloat(formData.igv),
             igv: parseFloat(formData.igv),
-            no_gravadas: formData.inafecto ? parseFloat(formData.inafecto) : 0.0, // Si no hay inafecto, asume 0
+            no_gravadas: formData.inafecto ? parseFloat(formData.inafecto) : 0.0,
             importe_facturado: parseFloat(formData.total),
-            tc: formData.moneda === 'USD' ? tipoCambio : 4.50, // Usa el tipo de cambio obtenido o uno por defecto
-            anticipo: 0.0, // Asume 0 si no se especifica
+            tc: formData.moneda === 'USD' ? tipoCambio : 1,
+            anticipo: 0.0,
             total: parseFloat(formData.total),
             pago: parseFloat(formData.total),
-            detalle: "Pago por servicios de consultoría", // Ajusta esto según sea necesario
+            detalle: "Pago por servicios de consultoría",
             estado: "PENDIENTE",
             empresa: "innova",
-            archivo: formData.archivo, // Añadir la ruta del archivo al request
-            tipo_cambio: formData.moneda === 'USD' ? tipoCambio : 4.50, // Usa el tipo de cambio obtenido o uno por defecto
-            afecto: parseFloat(formData.afecto) || 0.0, // Usar el valor calculado de afecto
+            archivo: formData.archivo,
+            tipo_cambio: formData.moneda === 'USD' ? tipoCambio : 1,
+            afecto: parseFloat(formData.afecto) || 0.0,
             inafecto: formData.inafecto ? parseFloat(formData.inafecto) : 0.0,
             rubro: formData.rubro,
             cuenta_contable: parseInt(formData.cuentaContable, 10)
@@ -199,7 +188,6 @@ const DatosRecibo = () => {
 
             const anotherRendition = window.confirm('Datos enviados con éxito. ¿Desea registrar otra rendición?');
             if (anotherRendition) {
-                // Limpiar el formulario
                 setFormData({
                     fecha: '',
                     ruc: '',
@@ -213,16 +201,15 @@ const DatosRecibo = () => {
                     igv: '',
                     inafecto: '',
                     total: '',
-                    archivo: '' // Resetear el campo archivo
+                    archivo: ''
                 });
-                setTipoCambio(''); // Resetear el tipo de cambio
+                setTipoCambio('');
                 setReceiptFile(null);
                 setQrFile(null);
                 setSearchRuc('');
                 setSearchResult(null);
                 setError('');
             } else {
-                // Redirigir al módulo de colaborador
                 navigate('/colaborador');
             }
         } catch (error) {
@@ -231,82 +218,96 @@ const DatosRecibo = () => {
     };
 
     return (
-        <div className="container mt-5">
-            <div className="card shadow p-3 mb-5 bg-white rounded">
-                <div className="card-body">
-                    <h1 className="card-title text-center mb-4">Datos del recibo</h1>
+        <Container sx={{ marginTop: 10 }}> {/* Agregar margen superior para evitar que el Navbar tape el contenido */}
+            <Card sx={{ boxShadow: 3 }}>
+                <CardContent>
+                    <Typography variant="h4" component="div" align="center" gutterBottom>
+                        Datos del recibo
+                    </Typography>
+
                     <div className="form-group row">
                         <div className="col-md-4">
-                            <label htmlFor="searchRuc" className="form-label">Buscar por RUC</label>
-                            <div className="input-group mb-3">
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="searchRuc"
-                                    value={searchRuc}
-                                    onChange={handleSearchRucChange}
-                                />
-                                <div className="input-group-append">
-                                    <button className="btn btn-primary" onClick={handleSearch}>Buscar</button>
-                                </div>
-                            </div>
+                            <TextField
+                                label="Buscar por RUC"
+                                variant="outlined"
+                                fullWidth
+                                value={searchRuc}
+                                onChange={handleSearchRucChange}
+                                sx={{ marginBottom: 2 }}
+                            />
+                            <Button variant="contained" color="primary" onClick={handleSearch}>
+                                Buscar
+                            </Button>
                         </div>
                         <div className="col-md-4">
-                            <label htmlFor="receiptFile" className="form-label">Adjuntar recibo</label>
-                            <label className="custom-file-upload">
-                                <input type="file" id="receiptFile" onChange={handleReceiptFileChange} />
+                            <Button
+                                variant="outlined"
+                                component="label"
+                                fullWidth
+                                sx={{ marginTop: 2 }}
+                            >
                                 Subir Recibo
-                            </label>
+                                <input type="file" hidden onChange={handleReceiptFileChange} />
+                            </Button>
                         </div>
                         <div className="col-md-4">
-                            <label htmlFor="qrFile" className="form-label">Adjuntar QR</label>
-                            <label className="custom-file-upload">
-                                <input type="file" id="qrFile" onChange={handleQrFileChange} />
+                            <Button
+                                variant="outlined"
+                                component="label"
+                                fullWidth
+                                sx={{ marginTop: 2 }}
+                            >
                                 Subir QR
-                            </label>
+                                <input type="file" hidden onChange={handleQrFileChange} />
+                            </Button>
                         </div>
                     </div>
-                    {error && <div className="alert alert-danger">{error}</div>}
+
+                    {error && <Alert severity="error">{error}</Alert>}
                     {searchResult && (
-                        <div className="alert alert-success">
+                        <Alert severity="success">
                             <p><strong>Razón Social:</strong> {searchResult.razonSocial}</p>
                             <p><strong>Dirección:</strong> {searchResult.direccion}</p>
                             <p><strong>Estado:</strong> {searchResult.estado}</p>
-                        </div>
+                        </Alert>
                     )}
+
                     <form onSubmit={handleSubmit}>
                         {['fecha', 'ruc', 'tipoDoc', 'cuentaContable', 'serie', 'numero', 'rubro', 'moneda', 'afecto', 'igv', 'inafecto', 'total'].map(field => (
-                            <div className="form-group" key={field}>
-                                <label htmlFor={field} className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
-                                {field === 'moneda' ? (
-                                    <select
-                                        className="form-control"
-                                        id={field}
-                                        name={field}
-                                        value={formData[field]}
-                                        onChange={handleChange}
-                                    >
-                                        <option value="PEN">PEN</option>
-                                        <option value="USD">USD</option>
-                                    </select>
-                                ) : (
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id={field}
-                                        name={field}
-                                        value={formData[field]}
-                                        onChange={handleChange}
-                                        readOnly={field === 'afecto'} // Campo afecto es de solo lectura
-                                    />
+                            <TextField
+                                key={field}
+                                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                                variant="outlined"
+                                fullWidth
+                                margin="normal"
+                                id={field}
+                                name={field}
+                                value={formData[field]}
+                                onChange={handleChange}
+                                InputProps={{ readOnly: field === 'afecto' }}
+                                select={field === 'moneda'}
+                            >
+                                {field === 'moneda' && (
+                                    <>
+                                        <MenuItem value="PEN">PEN</MenuItem>
+                                        <MenuItem value="USD">USD</MenuItem>
+                                    </>
                                 )}
-                            </div>
+                            </TextField>
                         ))}
-                        <button type="submit" className="btn btn-primary btn-block mt-4">Enviar</button>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            sx={{ marginTop: 4 }}
+                        >
+                            Enviar
+                        </Button>
                     </form>
-                </div>
-            </div>
-        </div>
+                </CardContent>
+            </Card>
+        </Container>
     );
 };
 

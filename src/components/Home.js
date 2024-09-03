@@ -40,9 +40,9 @@ const Home = ({ user }) => {
                 <button className="btn home-button" onClick={handleHistorialClick}>
                     Historial
                 </button>
-                <button className="btn home-button" onClick={handleMovilidadClick}>
+                {/* <button className="btn home-button" onClick={handleMovilidadClick}>
                     Movilidad
-                </button>
+                </button> */}
                 <button className="btn home-button" onClick={handleAnticiposViajesClick}>
                     Anticipos Viajes
                 </button>

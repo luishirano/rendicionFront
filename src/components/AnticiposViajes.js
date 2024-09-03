@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { Container, Form, Button } from 'react-bootstrap';
+import { Container, Card, CardContent, TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import axios from 'axios';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button as MuiButton } from '@mui/material'; // Importa Material-UI para el popup
-import './AnticiposViajes.css';
-
-
+import './AnticiposViajes.css'; // Mantén tu archivo CSS personalizado si es necesario
 
 const AnticiposViajes = () => {
 
@@ -14,7 +11,7 @@ const AnticiposViajes = () => {
         const month = (`0${today.getMonth() + 1}`).slice(-2); // Asegura dos dígitos
         const day = (`0${today.getDate()}`).slice(-2); // Asegura dos dígitos
         return `${year}-${month}-${day}`;
-    }; 
+    };
 
     const [formData, setFormData] = useState({
         usuario: 'colauser1@gmail.com',
@@ -23,7 +20,7 @@ const AnticiposViajes = () => {
         gerencia: '',
         area: '',
         ceco: '',
-        tipo_anticipo: '',
+        tipo_anticipo: 'VIAJES',
         destino: '',
         motivo: '',
         empresa: 'innova',
@@ -55,7 +52,8 @@ const AnticiposViajes = () => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf/', formData);
+            // Cambiar la URL para apuntar a la nueva API
+            const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf-custom/', formData);
             setResponseMessage('Documento creado y guardado en PDF correctamente.');
             setOpen(true); // Abre el popup cuando se crea el documento exitosamente
         } catch (error) {
@@ -72,205 +70,213 @@ const AnticiposViajes = () => {
     };
 
     return (
-        <Container className="mt-4">
-            <h1 className="text-center mb-4">Anticipos de Viajes</h1>
-            <Form onSubmit={handleSubmit}>
-                <Form.Group controlId="dni" className="mb-3">
-                    <Form.Label>DNI</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="dni" 
-                        placeholder="Ingrese el DNI" 
-                        value={formData.dni} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
+        <Container maxWidth="sm" sx={{ marginTop: 10 }}> {/* Ajustar el padding superior */}
+            <Card sx={{ boxShadow: 3 }}>
+                <CardContent>
+                    <Typography variant="h4" component="h1" align="center" gutterBottom>
+                        Anticipos de Viajes
+                    </Typography>
+                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="dni"
+                            label="DNI"
+                            name="dni"
+                            value={formData.dni}
+                            onChange={handleChange}
+                            autoFocus
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="responsable"
+                            label="Responsable"
+                            name="responsable"
+                            value={formData.responsable}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="gerencia"
+                            label="Gerencia"
+                            name="gerencia"
+                            value={formData.gerencia}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="area"
+                            label="Área"
+                            name="area"
+                            value={formData.area}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="ceco"
+                            label="CECO"
+                            name="ceco"
+                            value={formData.ceco}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="tipo_anticipo"
+                            label="Tipo de Anticipo"
+                            name="tipo_anticipo"
+                            value={formData.tipo_anticipo}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="destino"
+                            label="Destino"
+                            name="destino"
+                            value={formData.destino}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="motivo"
+                            label="Breve Motivo"
+                            name="motivo"
+                            value={formData.motivo}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="fecha_viaje"
+                            label="Fecha de Viaje"
+                            name="fecha_viaje"
+                            type="date"
+                            value={formData.fecha_viaje}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="dias"
+                            label="Días"
+                            name="dias"
+                            type="number"
+                            value={formData.dias}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="moneda"
+                            label="Moneda"
+                            name="moneda"
+                            select
+                            SelectProps={{
+                                native: true,
+                            }}
+                            value={formData.moneda}
+                            onChange={handleChange}
+                        >
+                            <option value="PEN">PEN</option>
+                            <option value="USD">USD</option>
+                        </TextField>
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="presupuesto"
+                            label="Presupuesto"
+                            name="presupuesto"
+                            type="number"
+                            value={formData.presupuesto}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="total"
+                            label="Total"
+                            name="total"
+                            type="number"
+                            value={formData.total}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="banco"
+                            label="Banco"
+                            name="banco"
+                            value={formData.banco}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="numero_cuenta"
+                            label="Número de Cuenta"
+                            name="numero_cuenta"
+                            value={formData.numero_cuenta}
+                            onChange={handleChange}
+                        />
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            disabled={isLoading}
+                            sx={{ mt: 3, mb: 2 }}
+                        >
+                            {isLoading ? 'Enviando...' : 'Enviar'}
+                        </Button>
+                    </Box>
+                </CardContent>
+            </Card>
 
-                <Form.Group controlId="responsable" className="mb-3">
-                    <Form.Label>Responsable</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="responsable" 
-                        placeholder="Ingrese el nombre del responsable" 
-                        value={formData.responsable} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="gerencia" className="mb-3">
-                    <Form.Label>Gerencia</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="gerencia" 
-                        placeholder="Ingrese la gerencia" 
-                        value={formData.gerencia} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="area" className="mb-3">
-                    <Form.Label>Área</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="area" 
-                        placeholder="Ingrese el área" 
-                        value={formData.area} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="ceco" className="mb-3">
-                    <Form.Label>CECO</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="ceco" 
-                        placeholder="Ingrese el CECO" 
-                        value={formData.ceco} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="tipoAnticipo" className="mb-3">
-                    <Form.Label>Tipo de Anticipo</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="tipo_anticipo" 
-                        placeholder="Ingrese el tipo de anticipo" 
-                        value={formData.tipo_anticipo} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="destino" className="mb-3">
-                    <Form.Label>Destino</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="destino" 
-                        placeholder="Ingrese el destino" 
-                        value={formData.destino} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="motivo" className="mb-3">
-                    <Form.Label>Breve Motivo</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="motivo" 
-                        placeholder="Ingrese el motivo" 
-                        value={formData.motivo} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="fechaViaje" className="mb-3">
-                    <Form.Label>Fecha de Viaje</Form.Label>
-                    <Form.Control 
-                        type="date" 
-                        name="fecha_viaje" 
-                        value={formData.fecha_viaje} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="dias" className="mb-3">
-                    <Form.Label>Días</Form.Label>
-                    <Form.Control 
-                        type="number" 
-                        name="dias" 
-                        placeholder="Ingrese el número de días" 
-                        value={formData.dias} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="moneda" className="mb-3">
-                    <Form.Label>Moneda</Form.Label>
-                    <Form.Control 
-                        as="select" 
-                        name="moneda" 
-                        value={formData.moneda} 
-                        onChange={handleChange} 
-                        required
-                    >
-                        <option value="PEN">PEN</option>
-                        <option value="USD">USD</option>
-                    </Form.Control>
-                </Form.Group>
-
-                <Form.Group controlId="presupuesto" className="mb-3">
-                    <Form.Label>Presupuesto</Form.Label>
-                    <Form.Control 
-                        type="number" 
-                        name="presupuesto" 
-                        placeholder="Ingrese el presupuesto" 
-                        value={formData.presupuesto} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="total" className="mb-3">
-                    <Form.Label>Total</Form.Label>
-                    <Form.Control 
-                        type="number" 
-                        name="total" 
-                        placeholder="Ingrese el total" 
-                        value={formData.total} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="banco" className="mb-3">
-                    <Form.Label>Banco</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="banco" 
-                        placeholder="Ingrese el banco" 
-                        value={formData.banco} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Form.Group controlId="numeroCuenta" className="mb-3">
-                    <Form.Label>Número de Cuenta</Form.Label>
-                    <Form.Control 
-                        type="text" 
-                        name="numero_cuenta" 
-                        placeholder="Ingrese el número de cuenta" 
-                        value={formData.numero_cuenta} 
-                        onChange={handleChange} 
-                        required 
-                    />
-                </Form.Group>
-
-                <Button variant="primary" type="submit" className="btn-block" disabled={isLoading}>
-                    {isLoading ? 'Enviando...' : 'Enviar'}
-                </Button>
-            </Form>
-
-            {/* Popup de Material-UI */}
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Registro Exitoso</DialogTitle>
                 <DialogContent>
-                    <p>{responseMessage}</p>
+                    <Typography>{responseMessage}</Typography>
                 </DialogContent>
                 <DialogActions>
-                    <MuiButton onClick={handleClose} color="primary">
+                    <Button onClick={handleClose} color="primary">
                         OK
-                    </MuiButton>
+                    </Button>
                 </DialogActions>
             </Dialog>
         </Container>
