@@ -12,11 +12,9 @@ const RendicionGastos = () => {
 
     const handleSubmit = () => {
         if (category) {
-            // Si la categoría seleccionada es "Servicio transporte De pasajeros", redirigir a la página de Movilidad
             if (category === "63112") {
-                navigate('/colaborador/movilidad'); // Redirige a la ruta del componente Movilidad
+                navigate('/colaborador/movilidad'); 
             } else {
-                // Para otras categorías, redirigir a DatosRecibo u otra ruta
                 navigate('/datos-recibo', {
                     state: { selectedCategory: category }
                 });

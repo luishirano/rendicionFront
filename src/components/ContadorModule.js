@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { 
-    Container, 
-    Grid, 
-    Typography, 
-    Button, 
-    Select, 
-    MenuItem, 
-    FormControl, 
-    InputLabel, 
-    TextField, 
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableContainer, 
-    TableHead, 
-    TableRow, 
-    Modal, 
-    Box 
+import {
+    Container,
+    Grid,
+    Typography,
+    Button,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    TextField,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Modal,
+    Box
 } from '@mui/material';
 import api, { getUsersByCompanyAndRole } from '../api';
 import lupaIcon from '../assets/lupa-icon.png'; // Asegúrate de tener esta imagen en la carpeta 'assets'
@@ -32,11 +32,11 @@ const ContadorModule = () => {
     const [filtros, setFiltros] = useState({
         colaborador: '',
         estado: 'PENDIENTE',
-        tipo_gasto: 'LOCAL',
+        tipo_gasto: '',
         tipo_documento: '',
         tipo_anticipo: '',
-        fechaDesde: '',
-        fechaHasta: ''
+        fechaDesde: '2024-08-01',
+        fechaHasta: new Date().toISOString().split('T')[0]
     });
 
     useEffect(() => {
@@ -99,16 +99,38 @@ const ContadorModule = () => {
         }
     };
 
+    // const handleEstadoChange = async (documentoId, nuevoEstado) => {
+    //     try {
+    //         await api.put(`/documentos/${documentoId}`, { estado: nuevoEstado });
+    //         setDocumentos(documentos.map(doc =>
+    //             doc.id === documentoId ? { ...doc, estado: nuevoEstado } : doc
+    //         ));
+    //     } catch (error) {
+    //         console.error('Error updating estado:', error);
+    //     }
+    // };
+
     const handleEstadoChange = async (documentoId, nuevoEstado) => {
+        console.log('documentoId:', documentoId);  // Depuración
+    
+        if (!documentoId) {
+            console.error('documentoId is undefined');
+            return;
+        }
+    
         try {
             await api.put(`/documentos/${documentoId}`, { estado: nuevoEstado });
-            setDocumentos(documentos.map(doc =>
-                doc.id === documentoId ? { ...doc, estado: nuevoEstado } : doc
-            ));
+            setDocumentos(prevDocumentos =>
+                prevDocumentos.map(doc =>
+                    doc.id === documentoId ? { ...doc, estado: nuevoEstado } : doc
+                )
+            );
         } catch (error) {
             console.error('Error updating estado:', error);
         }
     };
+    
+    
 
     const handleViewFile = (documento) => {
         setSelectedDocumento(documento);
@@ -167,7 +189,7 @@ const ContadorModule = () => {
     };
 
     return (
-        <Box sx={{ mt: 8 }}>  {/* Ajuste de margen superior */}
+        <Box sx={{ mt: 8, p: 2, bgcolor: 'white' }}>  {/* Ajuste de margen superior */}
             <Container maxWidth="lg">
                 {selectedColaborador && (
                     <Box mb={4} p={2} sx={{ border: '1px solid #ccc', borderRadius: 2 }}>
@@ -195,15 +217,23 @@ const ContadorModule = () => {
                 <FormControl fullWidth sx={{ mb: 4 }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={3}>
-                            <InputLabel id="colaborador-label">Colaborador</InputLabel>
                             <Select
                                 labelId="colaborador-label"
                                 name="colaborador"
-                                value={filtros.colaborador}
+                                value={filtros.colaborador || ''}
                                 onChange={handleFiltroChange}
                                 fullWidth
+                                displayEmpty
+                                renderValue={(selected) => {
+                                    if (selected === '') {
+                                        return <em>Buscar por colaborador</em>;
+                                    }
+                                    return colaboradores.find(colaborador => colaborador.email === selected)?.full_name || '';
+                                }}
                             >
-                                <MenuItem value=""><em>Buscar por colaborador</em></MenuItem>
+                                <MenuItem value="" disabled>
+                                    <em>Buscar por colaborador</em>
+                                </MenuItem>
                                 {colaboradores.map(colaborador => (
                                     <MenuItem key={colaborador.id} value={colaborador.email}>
                                         {colaborador.full_name}
@@ -212,14 +242,23 @@ const ContadorModule = () => {
                             </Select>
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <InputLabel id="estado-label">Estado</InputLabel>
                             <Select
                                 labelId="estado-label"
                                 name="estado"
-                                value={filtros.estado}
+                                value={filtros.estado || ''}
                                 onChange={handleFiltroChange}
                                 fullWidth
+                                displayEmpty
+                                renderValue={(selected) => {
+                                    if (selected === '') {
+                                        return <em>Seleccionar Estado</em>;
+                                    }
+                                    return selected;
+                                }}
                             >
+                                <MenuItem value="" disabled>
+                                    <em>Seleccionar Estado</em>
+                                </MenuItem>
                                 <MenuItem value="PENDIENTE">PENDIENTE</MenuItem>
                                 <MenuItem value="APROBADO">APROBADO</MenuItem>
                                 <MenuItem value="RENDIDO">RENDIDO</MenuItem>
@@ -227,29 +266,45 @@ const ContadorModule = () => {
                             </Select>
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <InputLabel id="tipo_gasto-label">Tipo de Gasto</InputLabel>
                             <Select
                                 labelId="tipo_gasto-label"
                                 name="tipo_gasto"
-                                value={filtros.tipo_gasto}
+                                value={filtros.tipo_gasto || ''}
                                 onChange={handleFiltroChange}
                                 fullWidth
+                                displayEmpty
+                                renderValue={(selected) => {
+                                    if (selected === '') {
+                                        return <em>Seleccionar Tipo de Gasto</em>;
+                                    }
+                                    return selected;
+                                }}
                             >
-                                <MenuItem value=""><em>Seleccionar Tipo de Gasto</em></MenuItem>
+                                <MenuItem value="" disabled>
+                                    <em>Seleccionar Tipo de Gasto</em>
+                                </MenuItem>
                                 <MenuItem value="MOVILIDAD">MOVILIDAD</MenuItem>
                                 <MenuItem value="LOCAL">LOCAL</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={12} sm={3}>
-                            <InputLabel id="tipo_anticipo-label">Tipo de Anticipo</InputLabel>
                             <Select
                                 labelId="tipo_anticipo-label"
                                 name="tipo_anticipo"
-                                value={filtros.tipo_anticipo}
+                                value={filtros.tipo_anticipo || ''}
                                 onChange={handleFiltroChange}
                                 fullWidth
+                                displayEmpty
+                                renderValue={(selected) => {
+                                    if (selected === '') {
+                                        return <em>Seleccionar Tipo de Anticipo</em>;
+                                    }
+                                    return selected;
+                                }}
                             >
-                                <MenuItem value=""><em>Seleccionar Tipo de Anticipo</em></MenuItem>
+                                <MenuItem value="" disabled>
+                                    <em>Seleccionar Tipo de Anticipo</em>
+                                </MenuItem>
                                 <MenuItem value="VIAJES">VIAJES</MenuItem>
                                 <MenuItem value="LOCAL">LOCAL</MenuItem>
                             </Select>
@@ -259,7 +314,7 @@ const ContadorModule = () => {
                                 label="Fecha Desde"
                                 type="date"
                                 name="fechaDesde"
-                                value={filtros.fechaDesde}
+                                value={filtros.fechaDesde || ''}
                                 onChange={handleFiltroChange}
                                 InputLabelProps={{
                                     shrink: true,
@@ -272,7 +327,7 @@ const ContadorModule = () => {
                                 label="Fecha Hasta"
                                 type="date"
                                 name="fechaHasta"
-                                value={filtros.fechaHasta}
+                                value={filtros.fechaHasta || ''}
                                 onChange={handleFiltroChange}
                                 InputLabelProps={{
                                     shrink: true,
@@ -282,30 +337,31 @@ const ContadorModule = () => {
                         </Grid>
                     </Grid>
                 </FormControl>
+
                 <TableContainer>
                     <Table>
-                        <TableHead>
+                        <TableHead sx={{ backgroundColor: '#007bff' }}> {/* Fondo de la cabecera */}
                             <TableRow>
-                                <TableCell>Item</TableCell>
-                                <TableCell>Fecha</TableCell>
-                                <TableCell>RUC</TableCell>
-                                <TableCell>Tipo Doc</TableCell>
-                                <TableCell>Cuenta Contable</TableCell>
-                                <TableCell>Serie</TableCell>
-                                <TableCell>Correlativo</TableCell>
-                                <TableCell>Rubro</TableCell>
-                                <TableCell>Moneda</TableCell>
-                                <TableCell>Tipo de Cambio</TableCell>
-                                <TableCell>Afecto</TableCell>
-                                <TableCell>IGV</TableCell>
-                                <TableCell>Inafecto</TableCell>
-                                <TableCell>Total</TableCell>
-                                <TableCell>Archivo</TableCell>
-                                <TableCell>Actualizar Estado</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Item</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Fecha</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>RUC</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Tipo Doc</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Cuenta Contable</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Serie</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Correlativo</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Rubro</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Moneda</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Tipo de Cambio</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Afecto</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>IGV</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Inafecto</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Total</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Archivo</TableCell>
+                                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actualizar Estado</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {documentos.filter(doc => 
+                            {documentos.filter(doc =>
                                 (!filtros.colaborador || (doc.usuario && doc.usuario.includes(filtros.colaborador))) &&
                                 (!filtros.estado || (doc.estado && doc.estado.includes(filtros.estado)))
                             ).map((documento, index) => (
@@ -351,15 +407,15 @@ const ContadorModule = () => {
                 </TableContainer>
 
                 <Modal open={showModal} onClose={handleCloseModal}>
-                    <Box sx={{ 
-                        position: 'absolute', 
-                        top: '50%', 
-                        left: '50%', 
-                        transform: 'translate(-50%, -50%)', 
-                        width: '80%', 
-                        bgcolor: 'background.paper', 
-                        boxShadow: 24, 
-                        p: 4 
+                    <Box sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '80%',
+                        bgcolor: 'background.paper',
+                        boxShadow: 24,
+                        p: 4
                     }}>
                         <Typography variant="h6" component="h2">
                             Archivo del Documento
