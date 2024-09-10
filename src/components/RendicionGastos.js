@@ -6,18 +6,75 @@ const RendicionGastos = () => {
     const [category, setCategory] = useState('');
     const navigate = useNavigate();
 
+    // Array con las opciones de categorías y sus descripciones
+    const categoryOptions = [
+        { value: '63111', label: 'Servicio transporte De carga' },
+        { value: '63112', label: 'Movilidad' },
+        { value: '6312', label: 'Correos' },
+        { value: '6313', label: 'Alojamiento' },
+        { value: '6314', label: 'Alimentación' },
+        { value: '6315', label: 'Otros gastos de viaje' },
+        { value: '6321', label: 'Asesoria - Administrativa' },
+        { value: '6322', label: 'Asesoria - Legal y tributaria' },
+        { value: '6323', label: 'Asesoria - Auditoría y contable' },
+        { value: '6324', label: 'Asesoria - Mercadotecnia' },
+        { value: '6325', label: 'Asesoria - Medioambiental' },
+        { value: '6326', label: 'Asesoria - Investigación y desarrollo' },
+        { value: '6327', label: 'Asesoria - Producción' },
+        { value: '6329', label: 'Asesoria - Otros' },
+        { value: '6343', label: 'Mantto y Reparacion - Inmuebles, maquinaria y equipo' },
+        { value: '6344', label: 'Mantto y Reparacion - Intangibles' },
+        { value: '6351', label: 'Alquileres - Terrenos' },
+        { value: '6352', label: 'Alquileres - Edificaciones' },
+        { value: '6353', label: 'Alquileres - Maquinarias y equipos de explotación' },
+        { value: '6354', label: 'Alquileres - Equipo de transporte' },
+        { value: '6356', label: 'Alquileres - Equipos diversos' },
+        { value: '6361', label: 'Energía eléctrica' },
+        { value: '6362', label: 'Gas' },
+        { value: '6363', label: 'Agua' },
+        { value: '6364', label: 'Teléfono' },
+        { value: '6365', label: 'Internet' },
+        { value: '6366', label: 'Radio' },
+        { value: '6367', label: 'Cable' },
+        { value: '6371', label: 'Publicidad' },
+        { value: '6372', label: 'Publicaciones' },
+        { value: '6373', label: 'Servicio de Relaciones públicas' },
+        { value: '6391', label: 'Gastos bancarios' },
+        { value: '6431', label: 'Impuesto predial' },
+        { value: '6432', label: 'Arbitrios municipales y seguridad ciudadana' },
+        { value: '6433', label: 'Impuesto al patrimonio vehicular' },
+        { value: '6434', label: 'Licencia de funcionamiento' },
+        { value: '6439', label: 'Otros' },
+        { value: '653', label: 'Suscripciones' },
+        { value: '654', label: 'Licencias y derechos de vigencia' },
+        { value: '656', label: 'Suministros' },
+        { value: '659', label: 'Otros gastos de gestión' },
+        { value: '6591', label: 'Donaciones' },
+        { value: '6592', label: 'Sanciones administrativas' },
+    ];
+
+    // Manejador para el cambio de categoría
     const handleCategoryChange = (event) => {
         setCategory(event.target.value);
     };
 
+    // Manejador del envío del formulario
     const handleSubmit = () => {
         if (category) {
-            if (category === "63112") {
-                navigate('/colaborador/movilidad'); 
-            } else {
-                navigate('/datos-recibo', {
-                    state: { selectedCategory: category }
-                });
+            // Encuentra la categoría seleccionada
+            const selectedOption = categoryOptions.find(option => option.value === category);
+
+            if (selectedOption) {
+                const selectedRubro = selectedOption.label;
+
+                if (category === "63112") {
+                    navigate('/colaborador/movilidad');
+                } else {
+                    // Navegar a datos-recibo pasando los valores de cuenta contable y rubro
+                    navigate('/datos-recibo', {
+                        state: { selectedCuentaContable: category, selectedRubro: selectedRubro }
+                    });
+                }
             }
         } else {
             alert('Por favor, seleccione una categoría antes de enviar');
@@ -41,50 +98,11 @@ const RendicionGastos = () => {
                             label="Categoría"
                         >
                             <MenuItem value="" disabled>Seleccione una categoría</MenuItem>
-                            <MenuItem value="63111">Servicio transporte De carga</MenuItem>
-                            <MenuItem value="63112">Servicio transporte De pasajeros</MenuItem>
-                            <MenuItem value="6312">Correos</MenuItem>
-                            <MenuItem value="6313">Alojamiento</MenuItem>
-                            <MenuItem value="6314">Alimentación</MenuItem>
-                            <MenuItem value="6315">Otros gastos de viaje</MenuItem>
-                            <MenuItem value="6321">Asesoria - Administrativa</MenuItem>
-                            <MenuItem value="6322">Asesoria - Legal y tributaria</MenuItem>
-                            <MenuItem value="6323">Asesoria - Auditoría y contable</MenuItem>
-                            <MenuItem value="6324">Asesoria - Mercadotecnia</MenuItem>
-                            <MenuItem value="6325">Asesoria - Medioambiental</MenuItem>
-                            <MenuItem value="6326">Asesoria - Investigación y desarrollo</MenuItem>
-                            <MenuItem value="6327">Asesoria - Producción</MenuItem>
-                            <MenuItem value="6329">Asesoria - Otros</MenuItem>
-                            <MenuItem value="6343">Mantto y Reparacion - Inmuebles, maquinaria y equipo</MenuItem>
-                            <MenuItem value="6344">Mantto y Reparacion - Intangibles</MenuItem>
-                            <MenuItem value="6351">Alquileres - Terrenos</MenuItem>
-                            <MenuItem value="6352">Alquileres - Edificaciones</MenuItem>
-                            <MenuItem value="6353">Alquileres - Maquinarias y equipos de explotación</MenuItem>
-                            <MenuItem value="6354">Alquileres - Equipo de transporte</MenuItem>
-                            <MenuItem value="6356">Alquileres - Equipos diversos</MenuItem>
-                            <MenuItem value="6361">Energía eléctrica</MenuItem>
-                            <MenuItem value="6362">Gas</MenuItem>
-                            <MenuItem value="6363">Agua</MenuItem>
-                            <MenuItem value="6364">Teléfono</MenuItem>
-                            <MenuItem value="6365">Internet</MenuItem>
-                            <MenuItem value="6366">Radio</MenuItem>
-                            <MenuItem value="6367">Cable</MenuItem>
-                            <MenuItem value="6371">Publicidad</MenuItem>
-                            <MenuItem value="6372">Publicaciones</MenuItem>
-                            <MenuItem value="6373">Servicio de Relaciones públicas</MenuItem>
-                            <MenuItem value="6391">Gastos bancarios</MenuItem>
-                            <MenuItem value="6431">Impuesto predial</MenuItem>
-                            <MenuItem value="6432">Arbitrios municipales y seguridad ciudadana</MenuItem>
-                            <MenuItem value="6433">Impuesto al patrimonio vehicular</MenuItem>
-                            <MenuItem value="6434">Licencia de funcionamiento</MenuItem>
-                            <MenuItem value="6439">Otros</MenuItem>
-                            <MenuItem value="653">Suscripciones</MenuItem>
-                            <MenuItem value="654">Licencias y derechos de vigencia</MenuItem>
-                            <MenuItem value="656">Suministros</MenuItem>
-                            <MenuItem value="659">Otros gastos de gestión</MenuItem>
-                            <MenuItem value="6591">Donaciones</MenuItem>
-                            <MenuItem value="6592">Sanciones administrativas</MenuItem>
-                            {/* Agregar más opciones según sea necesario */}
+                            {categoryOptions.map((option) => (
+                                <MenuItem key={option.value} value={option.value}>
+                                    {option.label}
+                                </MenuItem>
+                            ))}
                         </Select>
                     </FormControl>
                     <Button variant="contained" color="primary" fullWidth sx={{ mt: 3 }} onClick={handleSubmit}>

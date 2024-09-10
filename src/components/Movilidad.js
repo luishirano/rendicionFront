@@ -17,7 +17,7 @@ const Movilidad = () => {
         moneda: 'PEN',
         total: '',
         cuenta_contable: 63112,
-        rubro: 'Servicio transporte De pasajeros'
+        rubro: 'Movilidad'
     });
 
     const [responseMessage, setResponseMessage] = useState(''); 
@@ -47,7 +47,6 @@ const Movilidad = () => {
 
         const token = localStorage.getItem('token');
         let loggedInUser = '';
-
         if (token) {
             const decodedToken = jwtDecode(token);
             loggedInUser = decodedToken.sub;
@@ -60,11 +59,14 @@ const Movilidad = () => {
             ...formData, 
             fecha_solicitud: today,
             fecha_emision: today,
-            usuario: loggedInUser 
+            usuario: loggedInUser,
+            correlativo:"00000000",
+            dni:"111111111",
+            gerencia:"Comercial"
         };
 
         try {
-            await axios.post('http://127.0.0.1:8000/documentos/', dataToSend);
+            await axios.post('http://127.0.0.1:8000/generar-pdf-movilidad/', dataToSend);
             setResponseMessage('Documento creado correctamente.');
             setOpen(true); 
         } catch (error) {
@@ -111,7 +113,7 @@ const Movilidad = () => {
                             value={formData.destino}
                             onChange={handleChange}
                         />
-                        <TextField
+                        {/* <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -121,7 +123,9 @@ const Movilidad = () => {
                             name="motivo"
                             value={formData.motivo}
                             onChange={handleChange}
-                        />
+                        /> */}
+
+                        
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -134,7 +138,7 @@ const Movilidad = () => {
                             value={formData.gastoDeducible}
                             onChange={handleChange}
                         />
-                        <TextField
+                        {/* <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -145,7 +149,7 @@ const Movilidad = () => {
                             type="number"
                             value={formData.gastoNoDeducible}
                             onChange={handleChange}
-                        />
+                        /> */}
                         <TextField
                             variant="outlined"
                             margin="normal"

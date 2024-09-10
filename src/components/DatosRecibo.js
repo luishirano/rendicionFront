@@ -7,8 +7,15 @@ import './DatosRecibo.css';
 
 const DatosRecibo = () => {
     const location = useLocation();
+
+    console.log(location.state);
+
+    
     const navigate = useNavigate();
+    // const { selectedCuentaContable, selectedRubro } = location.state || {};
+
     const { selectedCuentaContable, selectedRubro } = location.state || {};
+
 
     const [formData, setFormData] = useState({
         fecha: '',
@@ -239,7 +246,7 @@ const DatosRecibo = () => {
                                 Buscar
                             </Button>
                         </div>
-                        <div className="col-md-4">
+                        {/* <div className="col-md-4">
                             <Button
                                 variant="outlined"
                                 component="label"
@@ -249,7 +256,7 @@ const DatosRecibo = () => {
                                 Subir Recibo
                                 <input type="file" hidden onChange={handleReceiptFileChange} />
                             </Button>
-                        </div>
+                        </div> */}
                         <div className="col-md-4">
                             <Button
                                 variant="outlined"
@@ -257,7 +264,7 @@ const DatosRecibo = () => {
                                 fullWidth
                                 sx={{ marginTop: 2 }}
                             >
-                                Subir QR
+                                Subir Recibo
                                 <input type="file" hidden onChange={handleQrFileChange} />
                             </Button>
                         </div>
