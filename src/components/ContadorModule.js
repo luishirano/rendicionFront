@@ -7,7 +7,6 @@ import {
     Select,
     MenuItem,
     FormControl,
-    InputLabel,
     TextField,
     Table,
     TableBody,
@@ -18,13 +17,14 @@ import {
     Modal,
     Box
 } from '@mui/material';
-import api, { getUsersByCompanyAndRole } from '../api';
+import api, { getUsersByCompanyAndRole, getNumerosRendicion } from '../api';
 import lupaIcon from '../assets/lupa-icon.png'; // Asegúrate de tener esta imagen en la carpeta 'assets'
 
 const ContadorModule = () => {
     const [user, setUser] = useState(null);
     const [documentos, setDocumentos] = useState([]);
     const [colaboradores, setColaboradores] = useState([]);
+    const [numerosRendicion, setNumerosRendicion] = useState([]);
     const [empresa, setEmpresa] = useState('');
     const [selectedDocumento, setSelectedDocumento] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -32,13 +32,15 @@ const ContadorModule = () => {
     const [filtros, setFiltros] = useState({
         colaborador: '',
         estado: 'PENDIENTE',
-        tipo_gasto: '',
-        tipo_documento: '',
-        tipo_anticipo: '',
+        tipo_solicitud: 'GASTO',
+        numero_rendicion: '',
         fechaDesde: '2024-08-01',
-        fechaHasta: new Date().toISOString().split('T')[0]
+        fechaHasta: new Date().toISOString().split('T')[0],
+        fechaEmisionDesde: '',
+        fechaEmisionHasta: ''
     });
 
+    // Obtener el usuario y establecer la empresa una sola vez
     useEffect(() => {
         const fetchUser = async () => {
             const response = await api.get('/users/me/');
@@ -48,6 +50,7 @@ const ContadorModule = () => {
         fetchUser();
     }, []);
 
+    // Obtener colaboradores una vez que la empresa esté disponible
     useEffect(() => {
         const fetchColaboradores = async () => {
             if (empresa) {
@@ -58,32 +61,53 @@ const ContadorModule = () => {
         fetchColaboradores();
     }, [empresa]);
 
-    useEffect(() => {
-        const fetchDocumentos = async () => {
+    // Obtener números de rendición cuando se seleccione un colaborador
+    // Obtener números de rendición cuando se seleccione un colaborador
+useEffect(() => {
+    const fetchNumerosRendicion = async () => {
+        if (filtros.colaborador) {
             try {
-                if (empresa) {
-                    const response = await api.get(`/documentos`, {
-                        params: {
-                            company_name: empresa,
-                            estado: filtros.estado,
-                            username: filtros.colaborador,
-                            tipo_gasto: filtros.tipo_gasto,
-                            tipo_documento: filtros.tipo_documento,
-                            tipo_anticipo: filtros.tipo_anticipo,
-                            fecha_solicitud_from: filtros.fechaDesde,
-                            fecha_solicitud_to: filtros.fechaHasta
-                        },
-                    });
-                    setDocumentos(response.data);
+                const response = await getNumerosRendicion(filtros.colaborador);
+                console.log(response);  // para verificar la estructura de la respuesta
+                if (response.data) {
+                    setNumerosRendicion(response.data);  // Aquí tomamos la propiedad 'data' de la respuesta
                 }
             } catch (error) {
-                console.error('Error fetching documentos:', error);
+                console.error('Error al obtener números de rendición:', error);
             }
-        };
+        } else {
+            setNumerosRendicion([]);
+        }
+    };
+    fetchNumerosRendicion();
+}, [filtros.colaborador]);
 
-        fetchDocumentos();
-    }, [empresa, filtros.estado, filtros.colaborador]);
 
+    // Función para buscar los documentos utilizando los filtros
+    const fetchDocumentos = async () => {
+        try {
+            if (empresa) {
+                const response = await api.get(`/documentos`, {
+                    params: {
+                        company_name: empresa,
+                        estado: filtros.estado,
+                        username: filtros.colaborador,
+                        tipo_solicitud: filtros.tipo_solicitud,
+                        numero_rendicion: filtros.numero_rendicion,
+                        fecha_solicitud_from: filtros.fechaDesde,
+                        fecha_solicitud_to: filtros.fechaHasta,
+                        fecha_rendicion_from: filtros.fechaEmisionDesde,
+                        fecha_rendicion_to: filtros.fechaEmisionHasta
+                    },
+                });
+                setDocumentos(response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching documentos:', error);
+        }
+    };
+
+    // Actualizar los filtros sin desencadenar la búsqueda
     const handleFiltroChange = (e) => {
         const { name, value } = e.target;
         setFiltros({
@@ -99,38 +123,42 @@ const ContadorModule = () => {
         }
     };
 
-    // const handleEstadoChange = async (documentoId, nuevoEstado) => {
-    //     try {
-    //         await api.put(`/documentos/${documentoId}`, { estado: nuevoEstado });
-    //         setDocumentos(documentos.map(doc =>
-    //             doc.id === documentoId ? { ...doc, estado: nuevoEstado } : doc
-    //         ));
-    //     } catch (error) {
-    //         console.error('Error updating estado:', error);
-    //     }
-    // };
+    // Ejecutar la búsqueda de documentos solo cuando se haga clic en "Filtrar"
+    const handleFiltrarClick = () => {
+        fetchDocumentos();
+    };
 
     const handleEstadoChange = async (documentoId, nuevoEstado) => {
-        console.log('documentoId:', documentoId);  // Depuración
-    
         if (!documentoId) {
             console.error('documentoId is undefined');
             return;
         }
-    
+
+        // Función para obtener la fecha actual
+        const getCurrentDate = () => {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = (`0${today.getMonth() + 1}`).slice(-2); // Asegura dos dígitos
+            const day = (`0${today.getDate()}`).slice(-2); // Asegura dos dígitos
+            return `${year}-${month}-${day}`;
+        };
+
+        const fechaRendicion = getCurrentDate();  // Obtener la fecha actual
+
         try {
-            await api.put(`/documentos/${documentoId}`, { estado: nuevoEstado });
+            await api.put(`/documentos/${documentoId}`, { 
+                estado: nuevoEstado, 
+                fecha_rendicion: fechaRendicion  // Enviar también la fecha de rendición
+            });
             setDocumentos(prevDocumentos =>
                 prevDocumentos.map(doc =>
-                    doc.id === documentoId ? { ...doc, estado: nuevoEstado } : doc
+                    doc.id === documentoId ? { ...doc, estado: nuevoEstado, fecha_rendicion: fechaRendicion } : doc
                 )
             );
         } catch (error) {
             console.error('Error updating estado:', error);
         }
     };
-    
-    
 
     const handleViewFile = (documento) => {
         setSelectedDocumento(documento);
@@ -142,19 +170,33 @@ const ContadorModule = () => {
         setSelectedDocumento(null);
     };
 
-    const handleDownloadFile = async (fileLocation) => {
-        const response = await api.get(`/documentos/download/`, {
-            params: { file_location: fileLocation },
-            responseType: 'blob',
-        });
-        const url = window.URL.createObjectURL(new Blob([response.data]));
+    // const handleDownloadFile = async (fileLocation) => {
+    //     const response = await api.get(`/documentos/download/`, {
+    //         params: { file_location: fileLocation },
+    //         responseType: 'blob',
+    //     });
+    //     const url = window.URL.createObjectURL(new Blob([response.data]));
+    //     const link = document.createElement('a');
+    //     link.href = url;
+    //     link.setAttribute('download', fileLocation.split('/').pop());
+    //     document.body.appendChild(link);
+    //     link.click();
+    //     document.body.removeChild(link);
+    // };
+
+    const handleDownloadFile = (fileLocation) => {
         const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', fileLocation.split('/').pop());
+        link.href = fileLocation; // Usa directamente la URL de Google Cloud Storage
+        link.setAttribute('download', fileLocation.split('/').pop()); // Extraer el nombre del archivo para la descarga
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
+    
+
+    
+
+
 
     const handleExportExcel = async () => {
         const params = {
@@ -177,15 +219,20 @@ const ContadorModule = () => {
             company_name: empresa,
             estado: filtros.estado,
             username: filtros.colaborador,
+            numero_rendicion: filtros.numero_rendicion
         };
-        const response = await api.get('/documentos/export/pdf', { params, responseType: 'blob' });
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'documentos.pdf');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        try {
+            const response = await api.get('/documentos/export/pdf', { params, responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `documentos_${filtros.numero_rendicion}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error exporting PDF:", error);
+        }
     };
 
     return (
@@ -267,46 +314,24 @@ const ContadorModule = () => {
                         </Grid>
                         <Grid item xs={12} sm={3}>
                             <Select
-                                labelId="tipo_gasto-label"
-                                name="tipo_gasto"
-                                value={filtros.tipo_gasto || ''}
+                                labelId="tipo_solicitud-label"
+                                name="tipo_solicitud"
+                                value={filtros.tipo_solicitud || ''}
                                 onChange={handleFiltroChange}
                                 fullWidth
                                 displayEmpty
                                 renderValue={(selected) => {
                                     if (selected === '') {
-                                        return <em>Seleccionar Tipo de Gasto</em>;
+                                        return <em>Seleccionar Tipo de Solicitud</em>;
                                     }
                                     return selected;
                                 }}
                             >
                                 <MenuItem value="" disabled>
-                                    <em>Seleccionar Tipo de Gasto</em>
+                                    <em>Seleccionar Tipo de Solicitud</em>
                                 </MenuItem>
-                                <MenuItem value="MOVILIDAD">MOVILIDAD</MenuItem>
-                                <MenuItem value="LOCAL">LOCAL</MenuItem>
-                            </Select>
-                        </Grid>
-                        <Grid item xs={12} sm={3}>
-                            <Select
-                                labelId="tipo_anticipo-label"
-                                name="tipo_anticipo"
-                                value={filtros.tipo_anticipo || ''}
-                                onChange={handleFiltroChange}
-                                fullWidth
-                                displayEmpty
-                                renderValue={(selected) => {
-                                    if (selected === '') {
-                                        return <em>Seleccionar Tipo de Anticipo</em>;
-                                    }
-                                    return selected;
-                                }}
-                            >
-                                <MenuItem value="" disabled>
-                                    <em>Seleccionar Tipo de Anticipo</em>
-                                </MenuItem>
-                                <MenuItem value="VIAJES">VIAJES</MenuItem>
-                                <MenuItem value="LOCAL">LOCAL</MenuItem>
+                                <MenuItem value="ANTICIPO">ANTICIPO</MenuItem>
+                                <MenuItem value="GASTO">GASTO</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={12} sm={3}>
@@ -335,8 +360,67 @@ const ContadorModule = () => {
                                 fullWidth
                             />
                         </Grid>
+                        <Grid item xs={12} sm={3}>
+                            <TextField
+                                label="Fecha Emisión Desde"
+                                type="date"
+                                name="fechaEmisionDesde"
+                                value={filtros.fechaEmisionDesde || ''}
+                                onChange={handleFiltroChange}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                fullWidth
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={3}>
+                            <TextField
+                                label="Fecha Emisión Hasta"
+                                type="date"
+                                name="fechaEmisionHasta"
+                                value={filtros.fechaEmisionHasta || ''}
+                                onChange={handleFiltroChange}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                fullWidth
+                            />
+                        </Grid>
+
+                        {/* Mostrar el combo de numero_rendicion solo si hay un colaborador seleccionado */}
+                        {filtros.colaborador && (
+                            <Grid item xs={12} sm={3}>
+                                <Select
+                                    labelId="numero_rendicion-label"
+                                    name="numero_rendicion"
+                                    value={filtros.numero_rendicion || ''}
+                                    onChange={handleFiltroChange}
+                                    fullWidth
+                                    displayEmpty
+                                    renderValue={(selected) => {
+                                        if (selected === '') {
+                                            return <em>Seleccionar Número de Rendición</em>;
+                                        }
+                                        return selected;
+                                    }}
+                                >
+                                    <MenuItem value="" disabled>
+                                        <em>Seleccionar Número de Rendición</em>
+                                    </MenuItem>
+                                    {numerosRendicion.length > 0 && numerosRendicion.map((numero, index) => (
+                                        <MenuItem key={index} value={numero}>
+                                            {numero}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </Grid>
+                        )}
                     </Grid>
                 </FormControl>
+
+                <Button variant="contained" color="primary" onClick={handleFiltrarClick} sx={{ mb: 4 }}>
+                    Filtrar
+                </Button>
 
                 <TableContainer>
                     <Table>

@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
-import { Container, Card, CardContent, TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Container, Card, CardContent, TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Backdrop } from '@mui/material';
 import axios from 'axios';
 import './AnticiposGastosLocales.css'; // Mantén tu archivo CSS personalizado si es necesario
 
 const AnticiposGastosLocales = () => {
+    const getCurrentDate = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = (`0${today.getMonth() + 1}`).slice(-2); // Asegura dos dígitos
+        const day = (`0${today.getDate()}`).slice(-2); // Asegura dos dígitos
+        return `${year}-${month}-${day}`;
+    };
+
     const [formData, setFormData] = useState({
         dni: '',
         responsable: '',
         gerencia: '',
-        tipo_anticipo: 'VIAJES',
+        tipo_anticipo: 'GASTOS LOCALES',
+        tipo_solicitud: 'ANTICIPO',
         empresa: 'innova',
         estado: 'PENDIENTE',
         area: '',
@@ -17,12 +26,56 @@ const AnticiposGastosLocales = () => {
         moneda: 'PEN',
         presupuesto: '',
         banco: '',
-        numero_cuenta: ''  // Asegúrate de que la clave coincide con el name del input
+        numero_cuenta: '',
+        fecha_solicitud: getCurrentDate()
     });
 
     const [responseMessage, setResponseMessage] = useState(''); // Para manejar la respuesta de la API
     const [isLoading, setIsLoading] = useState(false); // Estado para manejar la carga
     const [open, setOpen] = useState(false); // Estado para controlar el popup
+
+    // Obtener la información del usuario autenticado al cargar el componente
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/users/me', {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}` // Asegúrate de que el token esté en localStorage
+                    }
+                });
+
+                const userData = response.data;
+                // Actualiza los datos del formulario con la información del usuario
+                setFormData({
+                    ...formData,
+                    usuario: userData.email,
+                    dni: userData.dni,
+                    responsable: userData.full_name,
+                    gerencia: userData.gerencia,
+                    area: userData.area,
+                    ceco: userData.ceco,
+                    banco: userData.banco || '', // Si no hay banco, dejar vacío
+                    numero_cuenta: userData.cuenta_bancaria || '',
+                    fecha_emision: getCurrentDate(),
+                    fecha_solicitud: getCurrentDate(),
+                    tipo_solicitud: "ANTICIPO",
+                    tipo_anticipo: "GASTOS LOCALES",
+                    cuenta_contable: userData.cuenta_contable,
+                    total: userData.total,
+                    rubro: userData.rubro,
+                    tipo_solicitud: "GASTO",
+                    destino: userData.destino,
+                    origen: userData.origen
+
+
+                });
+            } catch (error) {
+                console.error('Error al obtener los datos del usuario:', error);
+            }
+        };
+
+        fetchUserData();
+    }, []); // Se ejecuta solo una vez cuando el componente se monta
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -34,18 +87,17 @@ const AnticiposGastosLocales = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
+        setIsLoading(true); // Iniciar el loading
 
         try {
-            // Cambiar la URL para apuntar a la nueva API
             const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf-local/', formData);
-            setResponseMessage('Documento creado y guardado en PDF correctamente.');
+            setResponseMessage('Anticipo creado correctamente.');
             setOpen(true); // Abre el popup cuando se crea el documento exitosamente
         } catch (error) {
             setResponseMessage('Error al crear el documento.');
             console.error('Error:', error);
         } finally {
-            setIsLoading(false);
+            setIsLoading(false); // Detener el loading
         }
     };
 
@@ -62,62 +114,6 @@ const AnticiposGastosLocales = () => {
                         Anticipos Gastos Locales
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="dni"
-                            label="DNI"
-                            name="dni"
-                            value={formData.dni}
-                            onChange={handleChange}
-                            autoFocus
-                        />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="responsable"
-                            label="Responsable"
-                            name="responsable"
-                            value={formData.responsable}
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="gerencia"
-                            label="Gerencia"
-                            name="gerencia"
-                            value={formData.gerencia}
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="area"
-                            label="Área"
-                            name="area"
-                            value={formData.area}
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="ceco"
-                            label="CECO"
-                            name="ceco"
-                            value={formData.ceco}
-                            onChange={handleChange}
-                        />
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -159,28 +155,6 @@ const AnticiposGastosLocales = () => {
                             value={formData.presupuesto}
                             onChange={handleChange}
                         />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="banco"
-                            label="Banco"
-                            name="banco"
-                            value={formData.banco}
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="numero_cuenta"
-                            label="Número de Cuenta"
-                            name="numero_cuenta"
-                            value={formData.numero_cuenta}
-                            onChange={handleChange}
-                        />
                         <Button
                             type="submit"
                             fullWidth
@@ -206,6 +180,11 @@ const AnticiposGastosLocales = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Backdrop with CircularProgress for loading effect */}
+            <Backdrop open={isLoading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </Container>
     );
 };

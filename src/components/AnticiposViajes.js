@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { Container, Card, CardContent, TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Container, Card, CardContent, TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Backdrop } from '@mui/material';
 import axios from 'axios';
 import './AnticiposViajes.css'; // Mantén tu archivo CSS personalizado si es necesario
 
 const AnticiposViajes = () => {
-
     const getCurrentDate = () => {
         const today = new Date();
         const year = today.getFullYear();
@@ -14,7 +13,7 @@ const AnticiposViajes = () => {
     };
 
     const [formData, setFormData] = useState({
-        usuario: 'colauser1@gmail.com',
+        usuario: '', // El usuario autenticado
         dni: '',
         responsable: '',
         gerencia: '',
@@ -35,9 +34,43 @@ const AnticiposViajes = () => {
         fecha_solicitud: getCurrentDate()
     });
 
-    const [responseMessage, setResponseMessage] = useState(''); // Para manejar la respuesta de la API
-    const [isLoading, setIsLoading] = useState(false); // Estado para manejar la carga
-    const [open, setOpen] = useState(false); // Estado para controlar el popup
+    const [responseMessage, setResponseMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [open, setOpen] = useState(false);
+
+    // Obtener la información del usuario autenticado al cargar el componente
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/users/me', {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}` // Asegúrate de que el token esté en localStorage
+                    }
+                });
+
+                const userData = response.data;
+                // Actualiza los datos del formulario con la información del usuario
+                setFormData({
+                    ...formData,
+                    usuario: userData.email,
+                    dni: userData.dni,
+                    responsable: userData.full_name,
+                    gerencia: userData.gerencia,
+                    area: userData.area,
+                    ceco: userData.ceco,
+                    banco: userData.banco || '', // Si no hay banco, dejar vacío
+                    numero_cuenta: userData.cuenta_bancaria || '',
+                    fecha_emision: getCurrentDate(),
+                    tipo_solicitud: "ANTICIPO",
+                    tipo_anticipo: "VIAJES"
+                });
+            } catch (error) {
+                console.error('Error al obtener los datos del usuario:', error);
+            }
+        };
+
+        fetchUserData();
+    }, []); // Se ejecuta solo una vez cuando el componente se monta
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -54,8 +87,8 @@ const AnticiposViajes = () => {
         try {
             // Cambiar la URL para apuntar a la nueva API
             const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf-custom/', formData);
-            setResponseMessage('Documento creado y guardado en PDF correctamente.');
-            setOpen(true); // Abre el popup cuando se crea el documento exitosamente
+            setResponseMessage('Anticipo creado correctamente');
+            setOpen(true);
         } catch (error) {
             setResponseMessage('Error al crear el documento.');
             console.error('Error:', error);
@@ -66,18 +99,18 @@ const AnticiposViajes = () => {
 
     const handleClose = () => {
         setOpen(false);
-        window.history.back(); // Retrocede una vez en el historial del navegador
+        window.history.back();
     };
 
     return (
-        <Container maxWidth="sm" sx={{ marginTop: 10 }}> {/* Ajustar el padding superior */}
+        <Container maxWidth="sm" sx={{ marginTop: 10 }}>
             <Card sx={{ boxShadow: 3 }}>
                 <CardContent>
                     <Typography variant="h4" component="h1" align="center" gutterBottom>
                         Anticipos de Viajes
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
-                        <TextField
+                        {/* <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -88,8 +121,8 @@ const AnticiposViajes = () => {
                             value={formData.dni}
                             onChange={handleChange}
                             autoFocus
-                        />
-                        <TextField
+                        /> */}
+                        {/* <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -99,8 +132,8 @@ const AnticiposViajes = () => {
                             name="responsable"
                             value={formData.responsable}
                             onChange={handleChange}
-                        />
-                        <TextField
+                        /> */}
+                        {/* <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -110,8 +143,8 @@ const AnticiposViajes = () => {
                             name="gerencia"
                             value={formData.gerencia}
                             onChange={handleChange}
-                        />
-                        <TextField
+                        /> */}
+                        {/* <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -132,8 +165,8 @@ const AnticiposViajes = () => {
                             name="ceco"
                             value={formData.ceco}
                             onChange={handleChange}
-                        />
-                        <TextField
+                        /> */}
+                        {/* <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -143,7 +176,7 @@ const AnticiposViajes = () => {
                             name="tipo_anticipo"
                             value={formData.tipo_anticipo}
                             onChange={handleChange}
-                        />
+                        /> */}
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -175,6 +208,9 @@ const AnticiposViajes = () => {
                             label="Fecha de Viaje"
                             name="fecha_viaje"
                             type="date"
+                            InputLabelProps={{
+                                shrink: true, // Esto asegura que la etiqueta se mantenga visible
+                            }}
                             value={formData.fecha_viaje}
                             onChange={handleChange}
                         />
@@ -232,7 +268,7 @@ const AnticiposViajes = () => {
                             value={formData.total}
                             onChange={handleChange}
                         />
-                        <TextField
+                        {/* <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -253,7 +289,7 @@ const AnticiposViajes = () => {
                             name="numero_cuenta"
                             value={formData.numero_cuenta}
                             onChange={handleChange}
-                        />
+                        /> */}
                         <Button
                             type="submit"
                             fullWidth
@@ -279,6 +315,9 @@ const AnticiposViajes = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Backdrop open={isLoading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+                <CircularProgress color="inherit" />
+            </Backdrop>
         </Container>
     );
 };

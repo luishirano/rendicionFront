@@ -32,4 +32,9 @@ export const getUsersByCompanyAndRole = async (companyName, role) => {
     return response.data;
 };
 
+
+export const getNumerosRendicion = (usuario) => {
+    return api.get(`/documentos/numero-rendicion/`, { params: { usuario } });
+};
+
 export default api;

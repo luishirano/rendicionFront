@@ -1,21 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Container, Card, CardContent, Typography, TextField, Button, Alert, MenuItem } from '@mui/material';
+import { Container, Card, CardContent, Typography, TextField, Button, Alert, MenuItem, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import './DatosRecibo.css';
 
 const DatosRecibo = () => {
     const location = useLocation();
-
-    console.log(location.state);
-
-    
     const navigate = useNavigate();
-    // const { selectedCuentaContable, selectedRubro } = location.state || {};
-
     const { selectedCuentaContable, selectedRubro } = location.state || {};
-
 
     const [formData, setFormData] = useState({
         fecha: '',
@@ -30,15 +23,17 @@ const DatosRecibo = () => {
         igv: '',
         inafecto: '',
         total: '',
-        archivo: '' // Nuevo campo para almacenar la ruta del archivo QR
+        archivo: '' // Nuevo campo para almacenar la ruta del archivo
     });
 
-    const [tipoCambio, setTipoCambio] = useState('');  // Estado para manejar el tipo de cambio
+    const [tipoCambio, setTipoCambio] = useState('');
     const [searchRuc, setSearchRuc] = useState('');
     const [searchResult, setSearchResult] = useState(null);
     const [error, setError] = useState('');
-    const [receiptFile, setReceiptFile] = useState(null);
     const [qrFile, setQrFile] = useState(null);
+    const [isLoading, setIsLoading] = useState(false); // Estado para mostrar el loader
+    const [dialogOpen, setDialogOpen] = useState(false); // Estado para controlar el popup
+    const [isFormReset, setIsFormReset] = useState(false); // Para saber si el formulario se reinicia
 
     useEffect(() => {
         if (formData.igv) {
@@ -93,48 +88,53 @@ const DatosRecibo = () => {
         }
     };
 
-    const handleReceiptFileChange = (event) => {
-        setReceiptFile(event.target.files[0]);
-    };
-
     const handleQrFileChange = async (event) => {
         const file = event.target.files[0];
         setQrFile(file);
-    
+
         if (file) {
             const formData = new FormData();
             formData.append('file', file);
-    
+
+            setIsLoading(true); // Inicia el estado de carga
+
             try {
-                const uploadResponse = await axios.post('http://127.0.0.1:8000/upload-file/', formData, {
+                const uploadResponse = await axios.post('http://127.0.0.1:8000/upload-file-firebase/', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
                 });
-    
-                const fileLocation = uploadResponse.data.file_location;
-    
+
+                const fileLocation = uploadResponse.data.file_url;
+
                 const decodeResponse = await axios.post('http://localhost:8000/decode-qr/', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
                 });
-    
-                setFormData((prevFormData) => ({
-                    ...prevFormData,
-                    fecha: decodeResponse.data.fecha || '',
-                    ruc: decodeResponse.data.ruc || '',
-                    tipoDoc: decodeResponse.data.tipo || '',
-                    serie: decodeResponse.data.serie || '',
-                    numero: decodeResponse.data.numero || '',
-                    igv: decodeResponse.data.igv || '',
-                    total: decodeResponse.data.total || '',
-                    archivo: fileLocation
-                }));
-    
-                setError('');
+
+                if (decodeResponse.data.detail === "No QR code found in the image") {
+                    // Si el QR no es válido, muestra un error
+                    setError('No se encontró un código QR en la imagen. Por favor, intente con otra imagen.');
+                } else {
+                    // Si hay datos válidos, rellena el formulario
+                    setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        fecha: decodeResponse.data.fecha || '',
+                        ruc: decodeResponse.data.ruc || '',
+                        tipoDoc: decodeResponse.data.tipo || '',
+                        serie: decodeResponse.data.serie || '',
+                        numero: decodeResponse.data.numero || '',
+                        igv: decodeResponse.data.igv || '',
+                        total: decodeResponse.data.total || '',
+                        archivo: fileLocation
+                    }));
+                    setError(''); // Limpia el error si hay datos
+                }
             } catch (error) {
                 setError('Error al procesar el QR o subir el archivo. Por favor, intente nuevamente.');
+            } finally {
+                setIsLoading(false); // Termina el estado de carga
             }
         }
     };
@@ -177,6 +177,7 @@ const DatosRecibo = () => {
             pago: parseFloat(formData.total),
             detalle: "Pago por servicios de consultoría",
             estado: "PENDIENTE",
+            tipo_solicitud: "GASTO",
             empresa: "innova",
             archivo: formData.archivo,
             tipo_cambio: formData.moneda === 'USD' ? tipoCambio : 1,
@@ -187,45 +188,51 @@ const DatosRecibo = () => {
         };
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/documentos/', requestData, {
+            await axios.post('http://127.0.0.1:8000/documentos/', requestData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
 
-            const anotherRendition = window.confirm('Datos enviados con éxito. ¿Desea registrar otra rendición?');
-            if (anotherRendition) {
-                setFormData({
-                    fecha: '',
-                    ruc: '',
-                    tipoDoc: '',
-                    cuentaContable: selectedCuentaContable || '',
-                    serie: '',
-                    numero: '',
-                    rubro: selectedRubro || '',
-                    moneda: 'PEN',
-                    afecto: '',
-                    igv: '',
-                    inafecto: '',
-                    total: '',
-                    archivo: ''
-                });
-                setTipoCambio('');
-                setReceiptFile(null);
-                setQrFile(null);
-                setSearchRuc('');
-                setSearchResult(null);
-                setError('');
-            } else {
-                navigate('/colaborador');
-            }
+            // Mostrar el diálogo de éxito
+            setDialogOpen(true);
         } catch (error) {
             setError('Error al enviar los datos. Por favor, intente nuevamente.');
         }
     };
 
+    const handleDialogClose = (registerAnother) => {
+        setDialogOpen(false);
+        if (registerAnother) {
+            // Reiniciar el formulario
+            setFormData({
+                fecha: '',
+                ruc: '',
+                tipoDoc: '',
+                cuentaContable: selectedCuentaContable || '',
+                serie: '',
+                numero: '',
+                rubro: selectedRubro || '',
+                moneda: 'PEN',
+                afecto: '',
+                igv: '',
+                inafecto: '',
+                total: '',
+                archivo: ''
+            });
+            setTipoCambio('');
+            setQrFile(null);
+            setSearchRuc('');
+            setSearchResult(null);
+            setError('');
+        } else {
+            // Navegar de vuelta si no desea registrar otra rendición
+            navigate('/colaborador');
+        }
+    };
+
     return (
-        <Container sx={{ marginTop: 10 }}> {/* Agregar margen superior para evitar que el Navbar tape el contenido */}
+        <Container sx={{ marginTop: 10 }}>
             <Card sx={{ boxShadow: 3 }}>
                 <CardContent>
                     <Typography variant="h4" component="div" align="center" gutterBottom>
@@ -246,17 +253,6 @@ const DatosRecibo = () => {
                                 Buscar
                             </Button>
                         </div>
-                        {/* <div className="col-md-4">
-                            <Button
-                                variant="outlined"
-                                component="label"
-                                fullWidth
-                                sx={{ marginTop: 2 }}
-                            >
-                                Subir Recibo
-                                <input type="file" hidden onChange={handleReceiptFileChange} />
-                            </Button>
-                        </div> */}
                         <div className="col-md-4">
                             <Button
                                 variant="outlined"
@@ -270,16 +266,24 @@ const DatosRecibo = () => {
                         </div>
                     </div>
 
-                    {error && <Alert severity="error">{error}</Alert>}
-                    {searchResult && (
-                        <Alert severity="success">
-                            <p><strong>Razón Social:</strong> {searchResult.razonSocial}</p>
-                            <p><strong>Dirección:</strong> {searchResult.direccion}</p>
-                            <p><strong>Estado:</strong> {searchResult.estado}</p>
-                        </Alert>
+                    {isLoading ? ( // Mostrar un indicador de carga cuando esté procesando el QR
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                            <CircularProgress />
+                        </div>
+                    ) : (
+                        <>
+                            {error && <Alert severity="error">{error}</Alert>}
+                            {searchResult && (
+                                <Alert severity="success">
+                                    <p><strong>Razón Social:</strong> {searchResult.razonSocial}</p>
+                                    <p><strong>Dirección:</strong> {searchResult.direccion}</p>
+                                    <p><strong>Estado:</strong> {searchResult.estado}</p>
+                                </Alert>
+                            )}
+                        </>
                     )}
 
-                    <form onSubmit={handleSubmit}>
+                    {/* <form onSubmit={handleSubmit}>
                         {['fecha', 'ruc', 'tipoDoc', 'cuentaContable', 'serie', 'numero', 'rubro', 'moneda', 'afecto', 'igv', 'inafecto', 'total'].map(field => (
                             <TextField
                                 key={field}
@@ -311,9 +315,98 @@ const DatosRecibo = () => {
                         >
                             Enviar
                         </Button>
+                    </form> */}
+
+
+
+                    <form onSubmit={handleSubmit}>
+                        {['fecha', 'ruc', 'tipoDoc', 'cuentaContable', 'serie', 'numero', 'rubro'].map(field => (
+                            <TextField
+                                key={field}
+                                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                                variant="outlined"
+                                fullWidth
+                                margin="normal"
+                                id={field}
+                                name={field}
+                                value={formData[field]}
+                                onChange={handleChange}
+                            />
+                        ))}
+
+                        {/* Campo de Moneda antes de Afecto */}
+                        <TextField
+                            label="Moneda"
+                            variant="outlined"
+                            fullWidth
+                            margin="normal"
+                            id="moneda"
+                            name="moneda"
+                            value={formData.moneda}
+                            onChange={handleChange}
+                            select
+                        >
+                            <MenuItem value="PEN">PEN</MenuItem>
+                            <MenuItem value="USD">USD</MenuItem>
+                        </TextField>
+
+                        {/* Campo Afecto solo lectura */}
+                        <TextField
+                            label="Afecto"
+                            variant="outlined"
+                            fullWidth
+                            margin="normal"
+                            id="afecto"
+                            name="afecto"
+                            value={formData.afecto}
+                            InputProps={{ readOnly: true }}  // Campo solo lectura
+                        />
+
+                        {['igv', 'inafecto', 'total'].map(field => (
+                            <TextField
+                                key={field}
+                                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                                variant="outlined"
+                                fullWidth
+                                margin="normal"
+                                id={field}
+                                name={field}
+                                value={formData[field]}
+                                onChange={handleChange}
+                            />
+                        ))}
+
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            sx={{ marginTop: 4 }}
+                        >
+                            Enviar
+                        </Button>
                     </form>
+
+
+
+
                 </CardContent>
             </Card>
+
+            {/* Diálogo de confirmación con Material UI */}
+            <Dialog open={dialogOpen} onClose={() => handleDialogClose(false)}>
+                <DialogTitle>Datos enviados con éxito</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Documento creado correctamente.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => handleDialogClose(false)} color="secondary">
+                        OK
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };

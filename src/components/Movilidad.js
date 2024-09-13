@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Card, CardContent, Typography, TextField, Button, Box, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Container, Card, CardContent, Typography, TextField, Button, Box, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Backdrop } from '@mui/material';
 import axios from 'axios';
 import {jwtDecode} from 'jwt-decode'; 
-import './Movilidad.css'; 
+import './Movilidad.css';
 
 const Movilidad = () => {
     const [formData, setFormData] = useState({
@@ -16,27 +16,29 @@ const Movilidad = () => {
         empresa: 'innova',
         moneda: 'PEN',
         total: '',
-        cuenta_contable: 63112,
-        rubro: 'Movilidad'
+        cuenta_contable: 63112, // Se asigna un valor por defecto
+        rubro: 'Movilidad' // Se asigna un valor por defecto
     });
 
     const [responseMessage, setResponseMessage] = useState(''); 
     const [isLoading, setIsLoading] = useState(false); 
     const [open, setOpen] = useState(false); 
 
+    // Actualización del formulario
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
+        setFormData((prevState) => ({
+            ...prevState,
             [name]: value
-        });
+        }));
     };
 
+    // Cálculo automático del total basado en gastoDeducible y gastoNoDeducible
     useEffect(() => {
         const deducible = parseFloat(formData.gastoDeducible) || 0;
         const noDeducible = parseFloat(formData.gastoNoDeducible) || 0;
-        setFormData((prevFormData) => ({
-            ...prevFormData,
+        setFormData((prevState) => ({
+            ...prevState,
             total: deducible + noDeducible
         }));
     }, [formData.gastoDeducible, formData.gastoNoDeducible]);
@@ -52,6 +54,8 @@ const Movilidad = () => {
             loggedInUser = decodedToken.sub;
         } else {
             console.error("Token not found in localStorage.");
+            setIsLoading(false);
+            return;
         }
 
         const today = new Date().toISOString().split('T')[0]; 
@@ -60,18 +64,20 @@ const Movilidad = () => {
             fecha_solicitud: today,
             fecha_emision: today,
             usuario: loggedInUser,
-            correlativo:"00000000",
-            dni:"111111111",
-            gerencia:"Comercial"
+            correlativo: "00000000",
+            dni: "111111111",
+            gerencia: "Comercial"
         };
 
+        console.log("Datos enviados: ", dataToSend); // Para depurar
+
         try {
-            await axios.post('http://127.0.0.1:8000/generar-pdf-movilidad/', dataToSend);
+            const response = await axios.post('http://127.0.0.1:8000/generar-pdf-movilidad/', dataToSend);
             setResponseMessage('Documento creado correctamente.');
             setOpen(true); 
         } catch (error) {
             setResponseMessage('Error al crear el documento.');
-            console.error('Error:', error);
+            console.error('Error al crear el documento:', error.response || error.message);
         } finally {
             setIsLoading(false);
         }
@@ -83,7 +89,7 @@ const Movilidad = () => {
     };
 
     return (
-        <Container maxWidth="sm" sx={{ marginTop: 10 }}> {/* Ajustar el margen superior */}
+        <Container maxWidth="sm" sx={{ marginTop: 10 }}>
             <Card sx={{ boxShadow: 3 }}>
                 <CardContent>
                     <Typography variant="h4" component="div" align="center" gutterBottom>
@@ -113,7 +119,7 @@ const Movilidad = () => {
                             value={formData.destino}
                             onChange={handleChange}
                         />
-                        {/* <TextField
+                        <TextField
                             variant="outlined"
                             margin="normal"
                             required
@@ -123,9 +129,7 @@ const Movilidad = () => {
                             name="motivo"
                             value={formData.motivo}
                             onChange={handleChange}
-                        /> */}
-
-                        
+                        />
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -141,7 +145,6 @@ const Movilidad = () => {
                         {/* <TextField
                             variant="outlined"
                             margin="normal"
-                            required
                             fullWidth
                             id="gastoNoDeducible"
                             label="Gasto No Deducible"
@@ -160,11 +163,33 @@ const Movilidad = () => {
                             name="total"
                             type="number"
                             value={formData.total}
-                            onChange={handleChange}
                             InputProps={{
                                 readOnly: true,
                             }}
                         />
+                        {/* <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="cuenta_contable"
+                            label="Cuenta Contable"
+                            name="cuenta_contable"
+                            type="number"
+                            value={formData.cuenta_contable}
+                            onChange={handleChange}
+                        />
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="rubro"
+                            label="Rubro"
+                            name="rubro"
+                            value={formData.rubro}
+                            onChange={handleChange}
+                        /> */}
                         <Button
                             type="submit"
                             fullWidth
@@ -178,6 +203,10 @@ const Movilidad = () => {
                     </Box>
                 </CardContent>
             </Card>
+
+            <Backdrop open={isLoading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+                <CircularProgress color="inherit" />
+            </Backdrop>
 
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Registro Exitoso</DialogTitle>
