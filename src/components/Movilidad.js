@@ -72,7 +72,8 @@ const Movilidad = () => {
         console.log("Datos enviados: ", dataToSend); // Para depurar
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/generar-pdf-movilidad/', dataToSend);
+            //const response = await axios.post('http://localhost:8000/generar-pdf-movilidad/', dataToSend);
+            const response = await axios.post('https://rendicion-production.up.railway.app/generar-pdf-movilidad/', dataToSend);
             setResponseMessage('Documento creado correctamente.');
             setOpen(true); 
         } catch (error) {

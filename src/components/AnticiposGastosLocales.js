@@ -24,10 +24,10 @@ const AnticiposGastosLocales = () => {
         ceco: '',
         motivo: '',
         moneda: 'PEN',
-        presupuesto: '',
         banco: '',
         numero_cuenta: '',
         fecha_solicitud: getCurrentDate()
+ 
     });
 
     const [responseMessage, setResponseMessage] = useState(''); // Para manejar la respuesta de la API
@@ -38,7 +38,8 @@ const AnticiposGastosLocales = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/users/me', {
+               // const response = await axios.get('http://localhost:8000/users/me', {
+                const response = await axios.get('https://rendicion-production.up.railway.app/users/me', {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}` // Asegúrate de que el token esté en localStorage
                     }
@@ -61,11 +62,6 @@ const AnticiposGastosLocales = () => {
                     tipo_solicitud: "ANTICIPO",
                     tipo_anticipo: "GASTOS LOCALES",
                     cuenta_contable: userData.cuenta_contable,
-                    total: userData.total,
-                    rubro: userData.rubro,
-                    tipo_solicitud: "GASTO",
-                    destino: userData.destino,
-                    origen: userData.origen
 
 
                 });
@@ -90,7 +86,8 @@ const AnticiposGastosLocales = () => {
         setIsLoading(true); // Iniciar el loading
 
         try {
-            const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf-local/', formData);
+           // const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf-local/', formData);
+            const response = await axios.post('https://rendicion-production.up.railway.app/documentos/crear-con-pdf-local/', formData);
             setResponseMessage('Anticipo creado correctamente.');
             setOpen(true); // Abre el popup cuando se crea el documento exitosamente
         } catch (error) {
@@ -148,11 +145,11 @@ const AnticiposGastosLocales = () => {
                             margin="normal"
                             required
                             fullWidth
-                            id="presupuesto"
+                            id="total"
                             label="Presupuesto"
-                            name="presupuesto"
+                            name="total"
                             type="number"
-                            value={formData.presupuesto}
+                            value={formData.total}
                             onChange={handleChange}
                         />
                         <Button

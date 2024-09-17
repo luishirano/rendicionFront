@@ -42,7 +42,8 @@ const AnticiposViajes = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/users/me', {
+              //  const response = await axios.get('http://localhost:8000/users/me', {
+                const response = await axios.get('https://rendicion-production.up.railway.app/users/me', {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}` // Asegúrate de que el token esté en localStorage
                     }
@@ -86,7 +87,8 @@ const AnticiposViajes = () => {
 
         try {
             // Cambiar la URL para apuntar a la nueva API
-            const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf-custom/', formData);
+         //    const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf-custom/', formData);
+            const response = await axios.post('https://rendicion-production.up.railway.app/documentos/crear-con-pdf-custom/', formData);
             setResponseMessage('Anticipo creado correctamente');
             setOpen(true);
         } catch (error) {

@@ -506,7 +506,8 @@ useEffect(() => {
                         </Typography>
                         {selectedDocumento && selectedDocumento.archivo && (
                             <iframe
-                                src={`http://127.0.0.1:8000/documentos/view/?file_location=${encodeURIComponent(selectedDocumento.archivo)}`}
+                             //    src={`http://localhost:8000/documentos/view/?file_location=${encodeURIComponent(selectedDocumento.archivo)}`}
+                                src={`https://rendicion-production.up.railway.app/documentos/view/?file_location=${encodeURIComponent(selectedDocumento.archivo)}`}
                                 width="100%"
                                 height="600px"
                                 title="Archivo del Documento"

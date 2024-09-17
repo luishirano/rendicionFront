@@ -61,7 +61,8 @@ const DatosRecibo = () => {
 
     const fetchTipoCambio = async (fecha) => {
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/tipo-cambio/?fecha=${fecha}`);
+           // const response = await axios.get(`http://localhost:8000/tipo-cambio/?fecha=${fecha}`);
+            const response = await axios.get(`https://rendicion-production.up.railway.app/tipo-cambio/?fecha=${fecha}`);
             setTipoCambio(response.data.precioVenta);
         } catch (error) {
             setError('Error al obtener el tipo de cambio. Por favor, intente nuevamente.');
@@ -74,7 +75,8 @@ const DatosRecibo = () => {
 
     const handleSearch = async () => {
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/consulta-ruc?ruc=${searchRuc}`);
+          //  const response = await axios.get(`http://localhost:8000/consulta-ruc?ruc=${searchRuc}`);
+            const response = await axios.get(`https://rendicion-production.up.railway.app/consulta-ruc?ruc=${searchRuc}`);    
             setSearchResult(response.data);
             setFormData({
                 ...formData,
@@ -99,7 +101,8 @@ const DatosRecibo = () => {
             setIsLoading(true); // Inicia el estado de carga
 
             try {
-                const uploadResponse = await axios.post('http://127.0.0.1:8000/upload-file-firebase/', formData, {
+                 //const uploadResponse = await axios.post('http://localhost:8000/upload-file-firebase/', formData, {
+                const uploadResponse = await axios.post('https://rendicion-production.up.railway.app/upload-file-firebase/', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -107,7 +110,8 @@ const DatosRecibo = () => {
 
                 const fileLocation = uploadResponse.data.file_url;
 
-                const decodeResponse = await axios.post('http://localhost:8000/decode-qr/', formData, {
+                //const decodeResponse = await axios.post('http://localhost:8000/decode-qr/', formData, {
+                const decodeResponse = await axios.post('https://rendicion-production.up.railway.app/decode-qr/', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -188,7 +192,8 @@ const DatosRecibo = () => {
         };
 
         try {
-            await axios.post('http://127.0.0.1:8000/documentos/', requestData, {
+           //  await axios.post('http://localhost:8000/documentos/', requestData, {
+             await axios.post('https://rendicion-production.up.railway.app/documentos/', requestData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
