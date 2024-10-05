@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'; // Importa Th
 import Navbar from './components/Navbar';
 import Login from './components/Login';
 import ContadorModule from './components/ContadorModule';
+import AdministracionModule from './components/AdministracionModule';
 import ColaboradorModule from './components/ColaboradorModule';
 import Home from './components/Home';
 import AdminDashboard from './components/AdminDashboard';
@@ -12,7 +13,7 @@ import DatosRecibo from './components/DatosRecibo';
 import Movilidad from './components/Movilidad'; // Importa el componente Movilidad
 import AnticiposViajes from './components/AnticiposViajes'; // Importa el componente AnticiposViajes
 import AnticiposGastosLocales from './components/AnticiposGastosLocales'; // Importa el nuevo componente AnticiposGastosLocales
-import './index.css';
+//import './index.css';
 import api from './api';
 
 // Define el tema
@@ -43,6 +44,7 @@ function App() {
                 <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/contador" element={<ContadorModule user={user} />} />
+                    <Route path="/administracion" element={<AdministracionModule user={user} />} />
                     <Route path="/colaborador/*" element={<ColaboradorModule user={user} />} />
                     <Route path="/colaborador/movilidad" element={<Movilidad />} /> {/* Añadida esta línea */}
                     <Route path="/colaborador/anticipos-viajes" element={<AnticiposViajes />} /> {/* Añadida esta línea */}

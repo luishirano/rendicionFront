@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Card, CardContent, TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Backdrop } from '@mui/material';
+import { Container, Card, CardContent, TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Backdrop, MenuItem } from '@mui/material';
 import axios from 'axios';
-import './AnticiposViajes.css'; // Mantén tu archivo CSS personalizado si es necesario
+import './AnticiposViajes.css';
+import { baseURL, api } from '../api';
 
 const AnticiposViajes = () => {
     const getCurrentDate = () => {
@@ -23,27 +24,43 @@ const AnticiposViajes = () => {
         destino: '',
         motivo: '',
         empresa: 'innova',
-        estado: 'PENDIENTE',
-        fecha_viaje: '',
+        estado: 'POR APROBAR',
+        fecha_emision: '', // Guardaremos la fecha de viaje aquí
         dias: '',
         moneda: 'PEN',
         presupuesto: '',
         total: '',
         banco: '',
         numero_cuenta: '',
+        tipo_viaje: 'NACIONAL', // Valor por defecto "NACIONAL"
         fecha_solicitud: getCurrentDate()
     });
 
+    const [tipoViaje, setTipoViaje] = useState('NACIONAL');
     const [responseMessage, setResponseMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [open, setOpen] = useState(false);
+    const [openUbigeoDialog, setOpenUbigeoDialog] = useState(false);
+    const [selectedDepartamento, setSelectedDepartamento] = useState('');
+    const [selectedProvincia, setSelectedProvincia] = useState('');
+    const [selectedDistrito, setSelectedDistrito] = useState('');
+    const [provincias, setProvincias] = useState([]);
+    const [distritos, setDistritos] = useState([]);
+
+    // Ubigeo data
+    const ubigeoData = {
+        Lima: {
+            Lima: ["Miraflores", "San Isidro", "Surco"],
+            Callao: ["Ventanilla", "Bellavista"],
+        },
+        // Otros departamentos y sus provincias/distritos
+    };
 
     // Obtener la información del usuario autenticado al cargar el componente
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-              //  const response = await axios.get('http://localhost:8000/users/me', {
-                const response = await axios.get('https://rendicion-production.up.railway.app/users/me', {
+                const response = await axios.get(`${baseURL}/users/me`, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}` // Asegúrate de que el token esté en localStorage
                     }
@@ -81,14 +98,20 @@ const AnticiposViajes = () => {
         });
     };
 
+    const handleTipoViajeChange = (e) => {
+        const tipo = e.target.value;
+        setTipoViaje(tipo);
+        setFormData({
+            ...formData,
+            tipo_viaje: tipo
+        });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-
         try {
-            // Cambiar la URL para apuntar a la nueva API
-         //    const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf-custom/', formData);
-            const response = await axios.post('https://rendicion-production.up.railway.app/documentos/crear-con-pdf-custom/', formData);
+            const response = await axios.post(`${baseURL}/documentos/crear-con-pdf-custom/`, formData);
             setResponseMessage('Anticipo creado correctamente');
             setOpen(true);
         } catch (error) {
@@ -104,6 +127,30 @@ const AnticiposViajes = () => {
         window.history.back();
     };
 
+    const handleDepartamentoChange = (e) => {
+        const departamento = e.target.value;
+        setSelectedDepartamento(departamento);
+        setProvincias(Object.keys(ubigeoData[departamento]));
+        setSelectedProvincia('');
+        setSelectedDistrito('');
+    };
+
+    const handleProvinciaChange = (e) => {
+        const provincia = e.target.value;
+        setSelectedProvincia(provincia);
+        setDistritos(ubigeoData[selectedDepartamento][provincia]);
+        setSelectedDistrito('');
+    };
+
+    const handleDestinoSelection = () => {
+        const distrito = selectedDistrito;
+        setFormData((prevState) => ({
+            ...prevState,
+            destino: distrito,
+        }));
+        setOpenUbigeoDialog(false);
+    };
+
     return (
         <Container maxWidth="sm" sx={{ marginTop: 10 }}>
             <Card sx={{ boxShadow: 3 }}>
@@ -112,84 +159,53 @@ const AnticiposViajes = () => {
                         Anticipos de Viajes
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
-                        {/* <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="dni"
-                            label="DNI"
-                            name="dni"
-                            value={formData.dni}
-                            onChange={handleChange}
-                            autoFocus
-                        /> */}
-                        {/* <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="responsable"
-                            label="Responsable"
-                            name="responsable"
-                            value={formData.responsable}
-                            onChange={handleChange}
-                        /> */}
-                        {/* <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="gerencia"
-                            label="Gerencia"
-                            name="gerencia"
-                            value={formData.gerencia}
-                            onChange={handleChange}
-                        /> */}
-                        {/* <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="area"
-                            label="Área"
-                            name="area"
-                            value={formData.area}
-                            onChange={handleChange}
-                        />
+                        {/* Tipo de Viaje */}
                         <TextField
                             variant="outlined"
                             margin="normal"
                             required
                             fullWidth
-                            id="ceco"
-                            label="CECO"
-                            name="ceco"
-                            value={formData.ceco}
-                            onChange={handleChange}
-                        /> */}
-                        {/* <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="tipo_anticipo"
-                            label="Tipo de Anticipo"
-                            name="tipo_anticipo"
-                            value={formData.tipo_anticipo}
-                            onChange={handleChange}
-                        /> */}
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="destino"
-                            label="Destino"
-                            name="destino"
-                            value={formData.destino}
-                            onChange={handleChange}
-                        />
+                            id="tipo_viaje"
+                            label="Tipo de Viaje"
+                            name="tipo_viaje"
+                            select
+                            value={tipoViaje}
+                            onChange={handleTipoViajeChange}
+                        >
+                            <MenuItem value="NACIONAL">Viajes Nacionales</MenuItem>
+                            <MenuItem value="INTERNACIONAL">Viajes Internacionales</MenuItem>
+                        </TextField>
+
+                        {/* Si es Viaje Nacional, muestra el popup de ubicación */}
+                        {tipoViaje === 'NACIONAL' ? (
+                            <>
+                                <Button
+                                    variant="outlined"
+                                    fullWidth
+                                    onClick={() => setOpenUbigeoDialog(true)}
+                                    sx={{ mt: 2, mb: 2 }}
+                                >
+                                    Seleccionar Destino (Nacional)
+                                </Button>
+                                <Typography variant="body1" sx={{ mb: 2 }}>
+                                    {formData.destino ? `Destino seleccionado: ${formData.destino}` : 'No se ha seleccionado destino.'}
+                                </Typography>
+                            </>
+                        ) : (
+                            // Si es Viaje Internacional, muestra el campo de texto
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="destino"
+                                label="Destino Internacional"
+                                name="destino"
+                                value={formData.destino}
+                                onChange={handleChange}
+                            />
+                        )}
+
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -208,12 +224,12 @@ const AnticiposViajes = () => {
                             fullWidth
                             id="fecha_viaje"
                             label="Fecha de Viaje"
-                            name="fecha_viaje"
+                            name="fecha_emision" // Actualizado para que se guarde en fecha_emision
                             type="date"
                             InputLabelProps={{
                                 shrink: true, // Esto asegura que la etiqueta se mantenga visible
                             }}
-                            value={formData.fecha_viaje}
+                            value={formData.fecha_emision} // Ahora utiliza fecha_emision
                             onChange={handleChange}
                         />
                         <TextField
@@ -247,81 +263,118 @@ const AnticiposViajes = () => {
                             <option value="USD">USD</option>
                         </TextField>
                         <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="presupuesto"
-                            label="Presupuesto"
-                            name="presupuesto"
-                            type="number"
-                            value={formData.presupuesto}
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="total"
-                            label="Total"
-                            name="total"
-                            type="number"
-                            value={formData.total}
-                            onChange={handleChange}
-                        />
-                        {/* <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="banco"
-                            label="Banco"
-                            name="banco"
-                            value={formData.banco}
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="numero_cuenta"
-                            label="Número de Cuenta"
-                            name="numero_cuenta"
-                            value={formData.numero_cuenta}
-                            onChange={handleChange}
-                        /> */}
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            disabled={isLoading}
-                            sx={{ mt: 3, mb: 2 }}
-                        >
-                            {isLoading ? 'Enviando...' : 'Enviar'}
-                        </Button>
-                    </Box>
-                </CardContent>
-            </Card>
-
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Registro Exitoso</DialogTitle>
-                <DialogContent>
-                    <Typography>{responseMessage}</Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        OK
-                    </Button>
-                </DialogActions>
-            </Dialog>
-            <Backdrop open={isLoading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-                <CircularProgress color="inherit" />
-            </Backdrop>
-        </Container>
-    );
-};
-
-export default AnticiposViajes;
+                                                        variant="outlined"
+                                                        margin="normal"
+                                                        required
+                                                        fullWidth
+                                                        id="presupuesto"
+                                                        label="Presupuesto"
+                                                        name="presupuesto"
+                                                        type="number"
+                                                        value={formData.presupuesto}
+                                                        onChange={handleChange}
+                                                    />
+                                                    <TextField
+                                                        variant="outlined"
+                                                        margin="normal"
+                                                        required
+                                                        fullWidth
+                                                        id="total"
+                                                        label="Total"
+                                                        name="total"
+                                                        type="number"
+                                                        value={formData.total}
+                                                        onChange={handleChange}
+                                                    />
+                                                    <Button
+                                                        type="submit"
+                                                        fullWidth
+                                                        variant="contained"
+                                                        color="primary"
+                                                        disabled={isLoading}
+                                                        sx={{ mt: 3, mb: 2 }}
+                                                    >
+                                                        {isLoading ? 'Enviando...' : 'Solicitar'}
+                                                    </Button>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                            
+                                        <Dialog open={openUbigeoDialog} onClose={() => setOpenUbigeoDialog(false)}>
+                                            <DialogTitle>Seleccionar Destino Nacional</DialogTitle>
+                                            <DialogContent>
+                                                <TextField
+                                                    select
+                                                    label="Departamento"
+                                                    fullWidth
+                                                    value={selectedDepartamento}
+                                                    onChange={handleDepartamentoChange}
+                                                    sx={{ mb: 2 }}
+                                                >
+                                                    {Object.keys(ubigeoData).map((departamento) => (
+                                                        <MenuItem key={departamento} value={departamento}>
+                                                            {departamento}
+                                                        </MenuItem>
+                                                    ))}
+                                                </TextField>
+                                                <TextField
+                                                    select
+                                                    label="Provincia"
+                                                    fullWidth
+                                                    value={selectedProvincia}
+                                                    onChange={handleProvinciaChange}
+                                                    disabled={!selectedDepartamento}
+                                                    sx={{ mb: 2 }}
+                                                >
+                                                    {provincias.map((provincia) => (
+                                                        <MenuItem key={provincia} value={provincia}>
+                                                            {provincia}
+                                                        </MenuItem>
+                                                    ))}
+                                                </TextField>
+                                                <TextField
+                                                    select
+                                                    label="Distrito"
+                                                    fullWidth
+                                                    value={selectedDistrito}
+                                                    onChange={(e) => setSelectedDistrito(e.target.value)}
+                                                    disabled={!selectedProvincia}
+                                                >
+                                                    {distritos.map((distrito) => (
+                                                        <MenuItem key={distrito} value={distrito}>
+                                                            {distrito}
+                                                        </MenuItem>
+                                                    ))}
+                                                </TextField>
+                                            </DialogContent>
+                                            <DialogActions>
+                                                <Button onClick={() => setOpenUbigeoDialog(false)} color="secondary">
+                                                    Cancelar
+                                                </Button>
+                                                <Button onClick={handleDestinoSelection} color="primary">
+                                                    Seleccionar
+                                                </Button>
+                                            </DialogActions>
+                                        </Dialog>
+                            
+                                        <Dialog open={open} onClose={handleClose}>
+                                            <DialogTitle>Registro Exitoso</DialogTitle>
+                                            <DialogContent>
+                                                <Typography>{responseMessage}</Typography>
+                                            </DialogContent>
+                                            <DialogActions>
+                                                <Button onClick={handleClose} color="primary">
+                                                    OK
+                                                </Button>
+                                            </DialogActions>
+                                        </Dialog>
+                            
+                                        <Backdrop open={isLoading} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+                                            <CircularProgress color="inherit" />
+                                        </Backdrop>
+                                    </Container>
+                                );
+                            };
+                            
+                            export default AnticiposViajes;
+                            

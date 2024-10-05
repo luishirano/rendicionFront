@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Card, CardContent, TextField, Button, Box, Typography, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Backdrop } from '@mui/material';
 import axios from 'axios';
+import { baseURL, api } from '../api';
 import './AnticiposGastosLocales.css'; // Mantén tu archivo CSS personalizado si es necesario
 
 const AnticiposGastosLocales = () => {
@@ -19,15 +20,15 @@ const AnticiposGastosLocales = () => {
         tipo_anticipo: 'GASTOS LOCALES',
         tipo_solicitud: 'ANTICIPO',
         empresa: 'innova',
-        estado: 'PENDIENTE',
+        estado: 'POR APROBAR',
         area: '',
         ceco: '',
         motivo: '',
         moneda: 'PEN',
         banco: '',
         numero_cuenta: '',
-        fecha_solicitud: getCurrentDate()
- 
+        fecha_solicitud: getCurrentDate(),
+        fecha_emision: getCurrentDate() // Agregamos este campo para la fecha de emisión
     });
 
     const [responseMessage, setResponseMessage] = useState(''); // Para manejar la respuesta de la API
@@ -38,8 +39,7 @@ const AnticiposGastosLocales = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-               // const response = await axios.get('http://localhost:8000/users/me', {
-                const response = await axios.get('https://rendicion-production.up.railway.app/users/me', {
+                const response = await axios.get(`${baseURL}/users/me`, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}` // Asegúrate de que el token esté en localStorage
                     }
@@ -57,13 +57,11 @@ const AnticiposGastosLocales = () => {
                     ceco: userData.ceco,
                     banco: userData.banco || '', // Si no hay banco, dejar vacío
                     numero_cuenta: userData.cuenta_bancaria || '',
-                    fecha_emision: getCurrentDate(),
                     fecha_solicitud: getCurrentDate(),
+                    fecha_emision: getCurrentDate(), // Campo de fecha de emisión inicializado
                     tipo_solicitud: "ANTICIPO",
                     tipo_anticipo: "GASTOS LOCALES",
                     cuenta_contable: userData.cuenta_contable,
-
-
                 });
             } catch (error) {
                 console.error('Error al obtener los datos del usuario:', error);
@@ -86,8 +84,7 @@ const AnticiposGastosLocales = () => {
         setIsLoading(true); // Iniciar el loading
 
         try {
-           // const response = await axios.post('http://localhost:8000/documentos/crear-con-pdf-local/', formData);
-            const response = await axios.post('https://rendicion-production.up.railway.app/documentos/crear-con-pdf-local/', formData);
+            const response = await axios.post(`${baseURL}/documentos/crear-con-pdf-local/`, formData);
             setResponseMessage('Anticipo creado correctamente.');
             setOpen(true); // Abre el popup cuando se crea el documento exitosamente
         } catch (error) {
@@ -140,6 +137,24 @@ const AnticiposGastosLocales = () => {
                             <option value="PEN">PEN</option>
                             <option value="USD">USD</option>
                         </TextField>
+
+                        {/* Campo Fecha Emisión */}
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="fecha_emision"
+                            label="Fecha de Emisión"
+                            name="fecha_emision"
+                            type="date"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            value={formData.fecha_emision}
+                            onChange={handleChange}
+                        />
+
                         <TextField
                             variant="outlined"
                             margin="normal"
@@ -160,7 +175,7 @@ const AnticiposGastosLocales = () => {
                             disabled={isLoading}
                             sx={{ mt: 3, mb: 2 }}
                         >
-                            {isLoading ? 'Enviando...' : 'Enviar'}
+                            {isLoading ? 'Enviando...' : 'Solicitar'}
                         </Button>
                     </Box>
                 </CardContent>

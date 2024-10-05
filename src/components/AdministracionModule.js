@@ -21,7 +21,7 @@ import {
 import api, { getUsersByCompanyAndRole, getNumerosRendicion } from '../api';
 import lupaIcon from '../assets/lupa-icon.png'; // Asegúrate de tener esta imagen en la carpeta 'assets'
 
-const ContadorModule = () => {
+const AdministracionModule = () => {
     const [user, setUser] = useState(null);
     const [documentos, setDocumentos] = useState([]);
     const [colaboradores, setColaboradores] = useState([]);
@@ -32,7 +32,7 @@ const ContadorModule = () => {
     const [selectedColaborador, setSelectedColaborador] = useState(null);
     const [filtros, setFiltros] = useState({
         colaborador: '',
-        estado: 'POR APROBAR',
+        estado: 'POR ABONAR',
         tipo_solicitud: 'GASTO',
         numero_rendicion: '',
         fechaDesde: '2024-08-01',
@@ -171,6 +171,20 @@ useEffect(() => {
         setSelectedDocumento(null);
     };
 
+    // const handleDownloadFile = async (fileLocation) => {
+    //     const response = await api.get(`/documentos/download/`, {
+    //         params: { file_location: fileLocation },
+    //         responseType: 'blob',
+    //     });
+    //     const url = window.URL.createObjectURL(new Blob([response.data]));
+    //     const link = document.createElement('a');
+    //     link.href = url;
+    //     link.setAttribute('download', fileLocation.split('/').pop());
+    //     document.body.appendChild(link);
+    //     link.click();
+    //     document.body.removeChild(link);
+    // };
+
     const handleDownloadFile = (fileLocation) => {
         const link = document.createElement('a');
         link.href = fileLocation; // Usa directamente la URL de Google Cloud Storage
@@ -180,6 +194,11 @@ useEffect(() => {
         document.body.removeChild(link);
     };
     
+
+    
+
+
+
     const handleExportExcel = async () => {
         const params = {
             company_name: empresa,
@@ -288,9 +307,10 @@ useEffect(() => {
                                 <MenuItem value="">
                                     <em>Todos los Estados</em>
                                 </MenuItem>
-                                <MenuItem value="POR APROBAR">POR APROBAR</MenuItem>
-                                <MenuItem value="APROBADO">APROBADO</MenuItem>
-    
+                                <MenuItem value="POR ABONAR">POR ABONAR</MenuItem>
+                                <MenuItem value="CERRADO">CERRADO</MenuItem>
+                                {/* <MenuItem value="RENDIDO">RENDIDO</MenuItem>
+                                <MenuItem value="RECHAZADO">RECHAZADO</MenuItem> */}
                             </Select>
                         </Grid>
                         <Grid item xs={12} sm={3}>
@@ -341,7 +361,6 @@ useEffect(() => {
                                 fullWidth
                             />
                         </Grid>
-
                         {/* Mostrar el combo de numero_rendicion solo si hay un colaborador seleccionado */}
                         {filtros.colaborador && (
                             <Grid item xs={12} sm={3}>
@@ -436,12 +455,12 @@ useEffect(() => {
                                             <MenuItem value="" disabled>
                                                 <em>Selecciona un Estado</em>
                                             </MenuItem>
-                                            <MenuItem value="POR ABONAR">APROBADO</MenuItem>
+                                            <MenuItem value="POR ABONAR">POR ABONAR</MenuItem>
+                                            <MenuItem value="CERRADO">CERRADO</MenuItem>
                                             <MenuItem value="RECHAZADO">RECHAZADO</MenuItem>
-                                            <MenuItem value="POR APROBAR">POR APROBAR</MenuItem> {/* Agregar todas las opciones posibles */}
                                         </Select>
                                     </FormControl>
-                                </TableCell>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -484,4 +503,4 @@ useEffect(() => {
     );
 };
 
-export default ContadorModule;
+export default AdministracionModule;

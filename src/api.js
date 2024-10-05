@@ -1,9 +1,10 @@
 import axios from 'axios';
 
+export const baseURL = 'http://localhost:8080'; 
+//export const baseURL = 'https://rendicion-production.up.railway.app',
+
 const api = axios.create({
-    //  baseURL: 'http://localhost:8000',
-    baseURL: 'https://rendicion-production.up.railway.app',
-    //baseURL: 'https://xfcnt62w-8000.brs.devtunnels.ms/',
+    baseURL: baseURL,
     headers: {
         'Content-Type': 'application/json',
     },

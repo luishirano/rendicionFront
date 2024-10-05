@@ -77,9 +77,9 @@ const HistorialGastos = () => {
                                 onChange={(e) => setEstado(e.target.value)}
                             >
                                 <MenuItem value="">Todos</MenuItem>
-                                <MenuItem value="PENDIENTE">PENDIENTE</MenuItem>
-                                <MenuItem value="CANCELADO">CANCELADO</MenuItem>
-                                <MenuItem value="ABONADO">ABONADO</MenuItem>
+                                <MenuItem value="POR APROBAR">POR APROBAR</MenuItem>
+                                <MenuItem value="APROBADO">APROBADO</MenuItem>
+                                {/* <MenuItem value="ABONADO">ABONADO</MenuItem> */}
                             </Select>
                         </FormControl>
                     </Grid>
@@ -101,7 +101,7 @@ const HistorialGastos = () => {
                         </FormControl>
                     </Grid>
 
-                    <Grid item xs={12} sm={6} md={4}>
+                    {/* <Grid item xs={12} sm={6} md={4}>
                         <FormControl fullWidth>
                             <InputLabel id="tipo-anticipo-label">Tipo de Anticipo</InputLabel>
                             <Select
@@ -116,7 +116,7 @@ const HistorialGastos = () => {
                                 <MenuItem value="PRODUCTO">PRODUCTO</MenuItem>
                             </Select>
                         </FormControl>
-                    </Grid>
+                    </Grid> */}
 
                     {/* Fechas */}
                     <Grid item xs={12} sm={6} md={4}>
@@ -140,7 +140,7 @@ const HistorialGastos = () => {
                         />
                     </Grid>
 
-                    <Grid item xs={12} sm={6} md={4}>
+                    {/* <Grid item xs={12} sm={6} md={4}>
                         <TextField
                             label="Fecha Rendición Desde"
                             type="date"
@@ -149,8 +149,8 @@ const HistorialGastos = () => {
                             onChange={(e) => setFechaRendicionFrom(e.target.value)}
                             InputLabelProps={{ shrink: true }}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
+                    </Grid> */}
+                    {/* <Grid item xs={12} sm={6} md={4}>
                         <TextField
                             label="Fecha Rendición Hasta"
                             type="date"
@@ -159,17 +159,17 @@ const HistorialGastos = () => {
                             onChange={(e) => setFechaRendicionTo(e.target.value)}
                             InputLabelProps={{ shrink: true }}
                         />
-                    </Grid>
+                    </Grid> */}
 
                     {/* Filtro de número de rendición */}
-                    <Grid item xs={12} sm={6} md={4}>
+                    {/* <Grid item xs={12} sm={6} md={4}>
                         <TextField
                             label="Número de Rendición"
                             fullWidth
                             value={numeroRendicion}
                             onChange={(e) => setNumeroRendicion(e.target.value)}
                         />
-                    </Grid>
+                    </Grid> */}
 
                     {/* Botón para aplicar filtros */}
                     <Grid item xs={12}>

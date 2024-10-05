@@ -4,6 +4,7 @@ import { Container, Card, CardContent, Typography, TextField, Button, Alert, Men
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import './DatosRecibo.css';
+import { baseURL, api } from '../api';  
 
 const DatosRecibo = () => {
     const location = useLocation();
@@ -51,6 +52,23 @@ const DatosRecibo = () => {
         }
     }, [formData.moneda, formData.fecha]);
 
+
+
+    useEffect(() => {
+        if (formData.total && formData.afecto && formData.igv) {
+            const total = parseFloat(formData.total);
+            const afecto = parseFloat(formData.afecto);
+            const igv = parseFloat(formData.igv);
+            const inafectoValue = (total - (afecto + igv)).toFixed(2);
+
+            setFormData(prevFormData => ({
+                ...prevFormData,
+                inafecto: inafectoValue
+            }));
+        }
+    }, [formData.total, formData.afecto, formData.igv]);
+
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -61,8 +79,7 @@ const DatosRecibo = () => {
 
     const fetchTipoCambio = async (fecha) => {
         try {
-           // const response = await axios.get(`http://localhost:8000/tipo-cambio/?fecha=${fecha}`);
-            const response = await axios.get(`https://rendicion-production.up.railway.app/tipo-cambio/?fecha=${fecha}`);
+            const response = await axios.get(`${baseURL}/tipo-cambio/?fecha=${fecha}`);
             setTipoCambio(response.data.precioVenta);
         } catch (error) {
             setError('Error al obtener el tipo de cambio. Por favor, intente nuevamente.');
@@ -75,8 +92,7 @@ const DatosRecibo = () => {
 
     const handleSearch = async () => {
         try {
-          //  const response = await axios.get(`http://localhost:8000/consulta-ruc?ruc=${searchRuc}`);
-            const response = await axios.get(`https://rendicion-production.up.railway.app/consulta-ruc?ruc=${searchRuc}`);    
+            const response = await axios.get(`${baseURL}/consulta-ruc?ruc=${searchRuc}`);    
             setSearchResult(response.data);
             setFormData({
                 ...formData,
@@ -101,17 +117,13 @@ const DatosRecibo = () => {
             setIsLoading(true); // Inicia el estado de carga
 
             try {
-                 //const uploadResponse = await axios.post('http://localhost:8000/upload-file-firebase/', formData, {
-                const uploadResponse = await axios.post('https://rendicion-production.up.railway.app/upload-file-firebase/', formData, {
+                const uploadResponse = await axios.post(`${baseURL}/upload-file-firebase/`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
                 });
-
                 const fileLocation = uploadResponse.data.file_url;
-
-                //const decodeResponse = await axios.post('http://localhost:8000/decode-qr/', formData, {
-                const decodeResponse = await axios.post('https://rendicion-production.up.railway.app/decode-qr/', formData, {
+                const decodeResponse = await axios.post(`${baseURL}/decode-qr/`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -180,7 +192,7 @@ const DatosRecibo = () => {
             total: parseFloat(formData.total),
             pago: parseFloat(formData.total),
             detalle: "Pago por servicios de consultoría",
-            estado: "PENDIENTE",
+            estado: "POR APROBAR",
             tipo_solicitud: "GASTO",
             empresa: "innova",
             archivo: formData.archivo,
@@ -192,8 +204,7 @@ const DatosRecibo = () => {
         };
 
         try {
-           //  await axios.post('http://localhost:8000/documentos/', requestData, {
-             await axios.post('https://rendicion-production.up.railway.app/documentos/', requestData, {
+             await axios.post(`${baseURL}/documentos/`, requestData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -209,30 +220,12 @@ const DatosRecibo = () => {
     const handleDialogClose = (registerAnother) => {
         setDialogOpen(false);
         if (registerAnother) {
-            // Reiniciar el formulario
-            setFormData({
-                fecha: '',
-                ruc: '',
-                tipoDoc: '',
-                cuentaContable: selectedCuentaContable || '',
-                serie: '',
-                numero: '',
-                rubro: selectedRubro || '',
-                moneda: 'PEN',
-                afecto: '',
-                igv: '',
-                inafecto: '',
-                total: '',
-                archivo: ''
-            });
-            setTipoCambio('');
-            setQrFile(null);
-            setSearchRuc('');
-            setSearchResult(null);
-            setError('');
+            // Redirigir a la página de rendición de gastos
+            navigate('/colaborador/rendicion-gastos');
         } else {
-            // Navegar de vuelta si no desea registrar otra rendición
-            navigate('/colaborador');
+            // Finalizar rendición y cerrar sesión
+            localStorage.removeItem('token'); // Eliminar el token de sesión
+            navigate('/login'); // Redirigir al login
         }
     };
 
@@ -254,20 +247,39 @@ const DatosRecibo = () => {
                                 onChange={handleSearchRucChange}
                                 sx={{ marginBottom: 2 }}
                             />
-                            <Button variant="contained" color="primary" onClick={handleSearch}>
+                         <Button 
+                                variant="contained" 
+                                color="primary" 
+                                onClick={handleSearch}
+                                sx={{ 
+                                    backgroundColor: '#2E3192', 
+                                    '&:hover': { backgroundColor: '#1F237A' } 
+                                }}
+                            >
                                 Buscar
-                            </Button>
+                        </Button>
+
                         </div>
                         <div className="col-md-4">
-                            <Button
-                                variant="outlined"
-                                component="label"
-                                fullWidth
-                                sx={{ marginTop: 2 }}
-                            >
-                                Subir Recibo
-                                <input type="file" hidden onChange={handleQrFileChange} />
-                            </Button>
+                        <Button
+                            variant="outlined"
+                            component="label"
+                            fullWidth
+                            sx={{ 
+                                marginTop: 2,
+                                borderColor: '#2E3192',  // Color de la borda
+                                color: '#2E3192',        // Color del texto
+                                '&:hover': {
+                                    backgroundColor: '#F15A29',  // Fondo al hacer hover
+                                    borderColor: '#F15A29',      // Borde al hacer hover
+                                    color: 'white'               // Color del texto al hacer hover
+                                }
+                            }}
+                        >
+                            Subir Recibo
+                            <input type="file" hidden onChange={handleQrFileChange} />
+                        </Button>
+
                         </div>
                     </div>
 
@@ -287,42 +299,6 @@ const DatosRecibo = () => {
                             )}
                         </>
                     )}
-
-                    {/* <form onSubmit={handleSubmit}>
-                        {['fecha', 'ruc', 'tipoDoc', 'cuentaContable', 'serie', 'numero', 'rubro', 'moneda', 'afecto', 'igv', 'inafecto', 'total'].map(field => (
-                            <TextField
-                                key={field}
-                                label={field.charAt(0).toUpperCase() + field.slice(1)}
-                                variant="outlined"
-                                fullWidth
-                                margin="normal"
-                                id={field}
-                                name={field}
-                                value={formData[field]}
-                                onChange={handleChange}
-                                InputProps={{ readOnly: field === 'afecto' }}
-                                select={field === 'moneda'}
-                            >
-                                {field === 'moneda' && (
-                                    <>
-                                        <MenuItem value="PEN">PEN</MenuItem>
-                                        <MenuItem value="USD">USD</MenuItem>
-                                    </>
-                                )}
-                            </TextField>
-                        ))}
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            sx={{ marginTop: 4 }}
-                        >
-                            Enviar
-                        </Button>
-                    </form> */}
-
-
 
                     <form onSubmit={handleSubmit}>
                         {['fecha', 'ruc', 'tipoDoc', 'cuentaContable', 'serie', 'numero', 'rubro'].map(field => (
@@ -364,7 +340,7 @@ const DatosRecibo = () => {
                             id="afecto"
                             name="afecto"
                             value={formData.afecto}
-                            InputProps={{ readOnly: true }}  // Campo solo lectura
+                            // InputProps={{ readOnly: true }}  // Campo solo lectura
                         />
 
                         {['igv', 'inafecto', 'total'].map(field => (
@@ -381,20 +357,21 @@ const DatosRecibo = () => {
                             />
                         ))}
 
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            sx={{ marginTop: 4 }}
-                        >
-                            Enviar
-                        </Button>
+            <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ 
+                    marginTop: 4,
+                    backgroundColor: '#2E3192',  // Color de fondo
+                    '&:hover': { backgroundColor: '#1F237A' }  // Color en hover
+                }}
+            >
+                Solicitar
+            </Button>
+
                     </form>
-
-
-
-
                 </CardContent>
             </Card>
 
@@ -407,8 +384,11 @@ const DatosRecibo = () => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
+                    <Button onClick={() => handleDialogClose(true)} color="primary">
+                        Nuevo Gasto
+                    </Button>
                     <Button onClick={() => handleDialogClose(false)} color="secondary">
-                        OK
+                        Finalizar Rendición
                     </Button>
                 </DialogActions>
             </Dialog>

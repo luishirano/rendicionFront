@@ -11,17 +11,17 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(''); // Limpiar el mensaje de error
+        setError('');
         try {
             const response = await api.post('/token', { email, password });
             localStorage.setItem('token', response.data.access_token);
             const userResponse = await api.get('/users/me/');
             const user = userResponse.data;
-            if (user.role === 'admin') {
-                navigate('/admin');
-            } else if (user.role === 'contador') {
+            if (user.role === 'ADMINISTRACION') {
+                navigate('/administracion');
+            } else if (user.role === 'APROBADOR') {
                 navigate('/contador');
-            } else if (user.role === 'colaborador') {
+            } else if (user.role === 'COLABORADOR') {
                 navigate('/colaborador');
             }
         } catch (error) {
@@ -32,7 +32,7 @@ const Login = () => {
 
     return (
         <Container maxWidth="sm">
-            <Box sx={{ mt: '80px', textAlign: 'center' }}>  {/* Ajustar margen superior para evitar superposición */}
+            <Box sx={{ mt: '80px', textAlign: 'center' }}>  {}  
                 <Typography variant="h4" component="h1" gutterBottom>
                     Bienvenido
                 </Typography>
@@ -51,6 +51,7 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"
                     autoFocus
+                    InputLabelProps={{ shrink: true }} 
                 />
                 <TextField
                     variant="outlined"
@@ -64,13 +65,19 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
+                    InputLabelProps={{ shrink: true }} 
                 />
                 <Button
                     type="submit"
                     fullWidth
                     variant="contained"
                     color="primary"
-                    sx={{ mt: 3, mb: 2 }}
+                    sx={{ 
+                        mt: 3, 
+                        mb: 2, 
+                        backgroundColor: '#2E3192',
+                        '&:hover': { backgroundColor: '#1F237A' }
+                    }}
                 >
                     Iniciar Sesión
                 </Button>

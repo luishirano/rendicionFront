@@ -82,13 +82,13 @@ const RendicionGastos = () => {
     };
 
     return (
-        <Container maxWidth="sm" sx={{ mt: 5 }}>
+        <Container maxWidth="sm" sx={{ mt: 5 }}> {/* Elimina el contenedor extra */}
             <Card>
                 <CardContent>
                     <Typography variant="h4" component="h1" align="center" gutterBottom>
-                        Rendición de Gastos
+                        Gastos Generales
                     </Typography>
-                    <FormControl fullWidth variant="outlined">
+                    <FormControl fullWidth variant="outlined" sx={{ marginBottom: 3 }}>
                         <InputLabel id="category-label">Categoría</InputLabel>
                         <Select
                             labelId="category-label"
@@ -105,7 +105,17 @@ const RendicionGastos = () => {
                             ))}
                         </Select>
                     </FormControl>
-                    <Button variant="contained" color="primary" fullWidth sx={{ mt: 3 }} onClick={handleSubmit}>
+                    <Button
+                        variant="contained"
+                        fullWidth
+                        onClick={handleSubmit}
+                        sx={{
+                            backgroundColor: '#2E3192', // Establece el color de fondo personalizado
+                            '&:hover': {
+                                backgroundColor: '#1F237A', // Color al hacer hover
+                            },
+                        }}
+                    >
                         Siguiente
                     </Button>
                 </CardContent>
